@@ -1,0 +1,267 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes wa-typing {
+  0%,  60%, 100% { transform: translateY(0);    opacity: 0.4; }
+  30%            { transform: translateY(-3px); opacity: 1;   }
+}
+
+@keyframes wa-fade-in {
+  from { opacity: 0; transform: translateY(2px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+@layer base {
+  html, body, #root {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: 'Segoe UI', Helvetica, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 14.2px;
+    color: #111b21;
+    background-color: #efeae2;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  /* Hide-until-hover scrollbars (WhatsApp Web behavior) */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 3px;
+  }
+  *:hover::-webkit-scrollbar-thumb {
+    background: rgba(17, 27, 33, 0.18);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(17, 27, 33, 0.35) !important;
+  }
+}
+
+@layer components {
+  /* ── App shell with teal strip ── */
+  .wa-shell-bg {
+    background: linear-gradient(to bottom, #00a884 0, #00a884 127px, #d9dbd5 127px, #d9dbd5 100%);
+  }
+
+  /* ── Message bubble tails ── */
+
+  /* Outgoing (user) bubble tail — top-right */
+  .bubble-out {
+    position: relative;
+    border-radius: 7.5px 0 7.5px 7.5px;
+  }
+  .bubble-out::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -8px;
+    width: 8px;
+    height: 13px;
+    background: transparent;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M1,0 Q8,0 8,13 Q8,13 0,13 L0,1 Q0,0 1,0Z' fill='%23d9fdd3'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+  }
+  .bubble-out-notail {
+    border-radius: 7.5px;
+  }
+
+  /* Incoming (AI) bubble tail — top-left */
+  .bubble-in {
+    position: relative;
+    border-radius: 0 7.5px 7.5px 7.5px;
+  }
+  .bubble-in::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -8px;
+    width: 8px;
+    height: 13px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M7,0 Q0,0 0,13 Q0,13 8,13 L8,1 Q8,0 7,0Z' fill='%23ffffff'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+  }
+  .bubble-in-notail {
+    border-radius: 7.5px;
+  }
+
+  .bubble-anim {
+    animation: wa-fade-in 120ms ease-out;
+  }
+
+  /* ── Chat background with doodle pattern ── */
+  .chat-bg {
+    background-color: #efeae2;
+    background-image: url('/wa-pattern.svg');
+    background-repeat: repeat;
+    background-size: 400px 400px;
+  }
+
+  /* ── Icon button with circular hover ── */
+  .icon-btn {
+    @apply flex items-center justify-center w-10 h-10 rounded-full cursor-pointer transition-colors duration-150;
+    color: #54656f;
+    border: none;
+    background: transparent;
+  }
+  .icon-btn:hover {
+    background-color: rgba(134, 150, 160, 0.15);
+  }
+  .icon-btn:active {
+    background-color: rgba(134, 150, 160, 0.28);
+  }
+
+  /* ── Unread badge ── */
+  .unread-badge {
+    @apply flex items-center justify-center min-w-[20px] h-5 rounded-full text-white text-xs font-medium px-[6px];
+    background-color: #25d366;
+    font-size: 11px;
+    line-height: 1;
+    letter-spacing: 0;
+  }
+
+  /* ── Filter pills (All / Unread / Favourites / Groups) ── */
+  .wa-pill {
+    display: inline-flex;
+    align-items: center;
+    height: 28px;
+    padding: 0 12px;
+    border-radius: 14px;
+    font-size: 13px;
+    line-height: 1;
+    color: #111b21;
+    background-color: #f0f2f5;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.15s;
+  }
+  .wa-pill:hover {
+    background-color: #e4e6eb;
+  }
+  .wa-pill-active {
+    background-color: #d9fdd3;
+    color: #0a332c;
+  }
+  .wa-pill-active:hover {
+    background-color: #c9f5c1;
+  }
+
+  /* ── Typing indicator (3 bouncing dots) ── */
+  .wa-typing {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 0;
+  }
+  .wa-typing span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #8696a0;
+    animation: wa-typing 1.2s infinite ease-in-out;
+  }
+  .wa-typing span:nth-child(2) { animation-delay: 0.15s; }
+  .wa-typing span:nth-child(3) { animation-delay: 0.30s; }
+
+  /* ── Auth input underline style ── */
+  .auth-input {
+    @apply w-full bg-transparent border-0 border-b border-wa-border outline-none pb-1 pt-4 text-wa-text-primary;
+    font-size: 15px;
+    transition: border-color 0.2s;
+  }
+  .auth-input:focus {
+    border-bottom-color: #00a884;
+  }
+
+  /* ── Auth primary button ── */
+  .auth-btn {
+    @apply w-full bg-wa-accent text-white font-medium py-3 rounded text-sm tracking-wide uppercase;
+    transition: background-color 0.2s;
+  }
+  .auth-btn:hover {
+    background-color: #008069;
+  }
+
+  /* ── Markdown inside bubbles ── */
+  .bubble-markdown p {
+    margin: 0;
+  }
+  .bubble-markdown p + p {
+    margin-top: 4px;
+  }
+  .bubble-markdown ul,
+  .bubble-markdown ol {
+    padding-left: 16px;
+    margin: 4px 0;
+  }
+  .bubble-markdown li {
+    margin: 2px 0;
+  }
+  .bubble-markdown code {
+    font-family: Consolas, 'Courier New', monospace;
+    background: rgba(0, 0, 0, 0.06);
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-size: 12.5px;
+  }
+  .bubble-markdown pre {
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: 6px;
+    padding: 8px 10px;
+    overflow-x: auto;
+    margin: 4px 0;
+  }
+  .bubble-markdown pre code {
+    background: none;
+    padding: 0;
+    font-size: 12.5px;
+  }
+  .bubble-markdown strong {
+    font-weight: 600;
+  }
+  .bubble-markdown em {
+    font-style: italic;
+  }
+  .bubble-markdown a {
+    color: #027eb5;
+    text-decoration: underline;
+    word-break: break-all;
+  }
+  .bubble-markdown h1,
+  .bubble-markdown h2,
+  .bubble-markdown h3 {
+    font-size: 14.2px;
+    font-weight: 600;
+    margin: 4px 0 2px;
+  }
+  .bubble-markdown blockquote {
+    border-left: 3px solid #00a884;
+    padding-left: 8px;
+    margin: 4px 0;
+    color: #3b4a54;
+  }
+}
