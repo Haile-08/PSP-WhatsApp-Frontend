@@ -42,7 +42,15 @@ function EncryptionNotice() {
   )
 }
 
-export default function MessageList({ sessionId, serverMessages = [] }) {
+const CONSENT_PATTERN = /consentimiento.*Revise y firme aqu/is
+
+function isConsentMessage(msg, role) {
+  if (role !== 'assistant') return false
+  const text = msg.content || msg.text || ''
+  return CONSENT_PATTERN.test(text)
+}
+
+export default function MessageList({ sessionId, serverMessages = [], onSend, isStreaming }) {
   const streamingMsgs = useSelector(selectStreamingMessages(sessionId))
   const messages = streamingMsgs ?? serverMessages
   const bottomRef = useRef(null)
@@ -50,6 +58,15 @@ export default function MessageList({ sessionId, serverMessages = [] }) {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  // Buttons are actionable only when the most recent message is the consent
+  // prompt itself — anything after it means the user has already responded.
+  const lastIdx = messages.length - 1
+  const lastMsg = lastIdx >= 0 ? messages[lastIdx] : null
+  const lastRole = lastMsg
+    ? lastMsg.role || (lastMsg.is_user ? 'user' : 'assistant')
+    : null
+  const activeConsentIdx = isConsentMessage(lastMsg, lastRole) ? lastIdx : -1
 
   const rendered = []
   let prevDate = null
@@ -67,12 +84,17 @@ export default function MessageList({ sessionId, serverMessages = [] }) {
     }
 
     const showTail = role !== prevRole
+    const isConsent = isConsentMessage(msg, role)
     rendered.push(
       <MessageBubble
         key={msg.id || `msg-${idx}`}
         message={msg}
         showTail={showTail}
         isOutgoing={isOutgoing}
+        showConsentButtons={isConsent}
+        consentActive={isConsent && idx === activeConsentIdx && !isStreaming}
+        onConsentAccept={() => onSend && onSend('Acepto')}
+        onConsentRefuse={() => onSend && onSend('Rechazo')}
       />
     )
     prevRole = role

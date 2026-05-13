@@ -1,34 +1,33 @@
-import { useGetSessionQuery } from '../sessions/sessionsApi'
+import { useConversationQuery } from '../auth/authApi'
 import { useStreamChat } from './useStreamChat'
 import ChatHeader from './ChatHeader'
 import MessageList from './MessageList'
 import ChatInput from './ChatInput'
 
-export default function ChatWindow({ sessionId }) {
-  const { data: session } = useGetSessionQuery(sessionId, { skip: !sessionId })
-  const serverMessages = session?.messages || []
-  const sessionToken = session?.token?.access_token || null
+export default function ChatWindow() {
+  const { data: conversation } = useConversationQuery()
+  const sessionId = conversation?.session_id || null
+  const serverMessages = conversation?.messages || []
 
   const { messages, sendMessage, isStreaming, cancelStream } = useStreamChat(
     sessionId,
-    serverMessages,
-    sessionToken
+    serverMessages
   )
 
   return (
     <div className="flex flex-col h-full">
-      <ChatHeader session={session} />
+      <ChatHeader session={conversation} />
 
-      {/* Message area with chat background */}
       <div className="flex-1 overflow-hidden flex flex-col chat-bg">
-        <MessageList sessionId={sessionId} serverMessages={messages} />
+        <MessageList
+          sessionId={sessionId}
+          serverMessages={messages}
+          onSend={sendMessage}
+          isStreaming={isStreaming}
+        />
       </div>
 
-      <ChatInput
-        onSend={sendMessage}
-        isStreaming={isStreaming}
-        onCancel={cancelStream}
-      />
+      <ChatInput onSend={sendMessage} isStreaming={isStreaming} onCancel={cancelStream} />
     </div>
   )
 }

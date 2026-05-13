@@ -1,11 +1,14 @@
-import { Search, MoreVertical, ArrowLeft, Phone, Video } from 'lucide-react'
+import { useState } from 'react'
 import { useDispatch } from 'react-redux'
-import { setActiveSession } from '../chat/chatSlice'
+import { Search, MoreVertical, Phone, Video } from 'lucide-react'
 import Avatar from '../../components/Avatar'
+import DropdownMenu from '../../components/DropdownMenu'
+import { logout } from '../auth/authSlice'
 
 export default function ChatHeader({ session }) {
-  const dispatch = useDispatch()
   const name = session?.name || 'PSP Assist'
+  const dispatch = useDispatch()
+  const [menuOpen, setMenuOpen] = useState(false)
 
   return (
     <div
@@ -17,15 +20,6 @@ export default function ChatHeader({ session }) {
         gap: '4px',
       }}
     >
-      {/* Mobile-only back arrow */}
-      <button
-        className="icon-btn md:hidden shrink-0"
-        onClick={() => dispatch(setActiveSession(null))}
-        title="Back"
-      >
-        <ArrowLeft size={22} />
-      </button>
-
       {/* Avatar + name + subtitle — clickable "open contact info" affordance */}
       <button
         type="button"
@@ -89,9 +83,28 @@ export default function ChatHeader({ session }) {
         <button className="icon-btn" title="Search">
           <Search size={20} />
         </button>
-        <button className="icon-btn" title="More options">
-          <MoreVertical size={22} />
-        </button>
+        <div style={{ position: 'relative' }}>
+          <button
+            className="icon-btn"
+            title="More options"
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            <MoreVertical size={22} />
+          </button>
+          {menuOpen && (
+            <DropdownMenu
+              onClose={() => setMenuOpen(false)}
+              style={{ top: '44px', right: '0' }}
+              items={[
+                {
+                  label: 'Logout',
+                  danger: true,
+                  onClick: () => dispatch(logout()),
+                },
+              ]}
+            />
+          )}
+        </div>
       </div>
     </div>
   )

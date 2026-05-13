@@ -1,14 +1,19 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input'
+import 'react-phone-number-input/style.css'
 import { useLoginMutation } from './authApi'
 import { setCredentials } from './authSlice'
 
 const loginSchema = z.object({
-  email: z.string().min(1, 'Email is required').email('Enter a valid email address'),
+  phone: z
+    .string()
+    .min(1, 'Phone number is required')
+    .refine((v) => isValidPhoneNumber(v || ''), 'Enter a valid phone number'),
   password: z.string().min(1, 'Password is required'),
 })
 
@@ -21,9 +26,10 @@ export default function LoginPage() {
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
-  } = useForm({ resolver: zodResolver(loginSchema) })
+  } = useForm({ resolver: zodResolver(loginSchema), defaultValues: { phone: '' } })
 
   const onSubmit = async (data) => {
     setServerError('')
@@ -32,7 +38,7 @@ export default function LoginPage() {
       dispatch(setCredentials(result))
       navigate('/')
     } catch {
-      setServerError('Invalid email or password. Please try again.')
+      setServerError('Invalid phone or password. Please try again.')
     }
   }
 
@@ -67,20 +73,28 @@ export default function LoginPage() {
             <div className="relative">
               <label
                 className="absolute top-0 left-0 font-wa"
-                style={{ fontSize: '12px', color: errors.email ? '#c53030' : '#00a884', fontWeight: 500 }}
+                style={{ fontSize: '12px', color: errors.phone ? '#c53030' : '#00a884', fontWeight: 500 }}
               >
-                Email address
+                Phone number
               </label>
-              <input
-                {...register('email')}
-                type="email"
-                autoComplete="email"
-                className="auth-input font-wa"
-                style={{ paddingTop: '20px', borderColor: errors.email ? '#c53030' : undefined }}
+              <Controller
+                name="phone"
+                control={control}
+                render={({ field }) => (
+                  <PhoneInput
+                    {...field}
+                    international
+                    defaultCountry="MX"
+                    countryCallingCodeEditable={false}
+                    placeholder="55 1234 5678"
+                    className="auth-input font-wa"
+                    style={{ paddingTop: '20px', borderColor: errors.phone ? '#c53030' : undefined }}
+                  />
+                )}
               />
-              {errors.email && (
+              {errors.phone && (
                 <p className="mt-1 font-wa" style={{ fontSize: '11px', color: '#c53030' }}>
-                  {errors.email.message}
+                  {errors.phone.message}
                 </p>
               )}
             </div>

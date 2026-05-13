@@ -1,14 +1,40 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useRegisterMutation } from './authApi'
+import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input'
+import 'react-phone-number-input/style.css'
+import { useRegisterMutation, useLoginMutation } from './authApi'
 import { setCredentials } from './authSlice'
 
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
+
 const registerSchema = z.object({
-  email: z.string().min(1, 'Email is required').email('Enter a valid email address'),
+  phone: z
+    .string()
+    .min(1, 'Phone number is required')
+    .refine((v) => isValidPhoneNumber(v || ''), 'Enter a valid phone number'),
+  username: z
+    .string()
+    .trim()
+    .min(1, 'Username is required')
+    .max(50, 'Username must be 50 characters or fewer'),
+  date_of_birth: z
+    .string()
+    .min(1, 'Date of birth is required')
+    .regex(ISO_DATE, 'Use the date picker (YYYY-MM-DD)')
+    .refine((v) => {
+      const d = new Date(v)
+      return !Number.isNaN(d.getTime()) && d <= new Date()
+    }, 'Date of birth cannot be in the future')
+    .refine((v) => {
+      const d = new Date(v)
+      const cutoff = new Date()
+      cutoff.setFullYear(cutoff.getFullYear() - 120)
+      return d >= cutoff
+    }, 'Date of birth is implausibly old'),
   password: z
     .string()
     .min(8, 'Password must be at least 8 characters')
@@ -23,20 +49,31 @@ export default function RegisterPage() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const [register, { isLoading: isRegistering }] = useRegisterMutation()
+  const [login] = useLoginMutation()
   const [serverError, setServerError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
 
   const {
     register: registerField,
+    control,
     handleSubmit,
     formState: { errors },
-  } = useForm({ resolver: zodResolver(registerSchema) })
+  } = useForm({
+    resolver: zodResolver(registerSchema),
+    defaultValues: { phone: '', username: '', date_of_birth: '' },
+  })
+
+  // Block the native date picker from selecting future dates.
+  const todayIso = new Date().toISOString().slice(0, 10)
 
   const onSubmit = async (data) => {
     setServerError('')
     try {
-      const result = await register(data).unwrap()
-      dispatch(setCredentials({ access_token: result.token.access_token }))
+      await register(data).unwrap()
+      // /auth/register returns user info but not a usable session token shape;
+      // immediately log in to obtain the bearer token.
+      const tokenResp = await login({ phone: data.phone, password: data.password }).unwrap()
+      dispatch(setCredentials(tokenResp))
       navigate('/')
     } catch (err) {
       const detail = err?.data?.detail
@@ -64,7 +101,7 @@ export default function RegisterPage() {
               PSP Assist
             </h1>
             <p className="mt-2 font-wa" style={{ fontSize: '16px', color: '#667781' }}>
-              Create your account to get started.
+              Sign up with your phone number to get started.
             </p>
           </div>
 
@@ -81,20 +118,73 @@ export default function RegisterPage() {
             <div className="relative">
               <label
                 className="absolute top-0 left-0 font-wa"
-                style={{ fontSize: '12px', color: errors.email ? '#c53030' : '#00a884', fontWeight: 500 }}
+                style={{ fontSize: '12px', color: errors.phone ? '#c53030' : '#00a884', fontWeight: 500 }}
               >
-                Email address
+                Phone number
+              </label>
+              <Controller
+                name="phone"
+                control={control}
+                render={({ field }) => (
+                  <PhoneInput
+                    {...field}
+                    international
+                    defaultCountry="MX"
+                    countryCallingCodeEditable={false}
+                    placeholder="55 1234 5678"
+                    className="auth-input font-wa"
+                    style={{ paddingTop: '20px', borderColor: errors.phone ? '#c53030' : undefined }}
+                  />
+                )}
+              />
+              {errors.phone && (
+                <p className="mt-1 font-wa" style={{ fontSize: '11px', color: '#c53030' }}>
+                  {errors.phone.message}
+                </p>
+              )}
+            </div>
+
+            <div className="relative">
+              <label
+                className="absolute top-0 left-0 font-wa"
+                style={{ fontSize: '12px', color: errors.username ? '#c53030' : '#00a884', fontWeight: 500 }}
+              >
+                Username
               </label>
               <input
-                {...registerField('email')}
-                type="email"
-                autoComplete="email"
+                {...registerField('username')}
+                type="text"
+                autoComplete="username"
+                maxLength={50}
+                placeholder="Your name"
                 className="auth-input font-wa"
-                style={{ paddingTop: '20px', borderColor: errors.email ? '#c53030' : undefined }}
+                style={{ paddingTop: '20px', borderColor: errors.username ? '#c53030' : undefined }}
               />
-              {errors.email && (
+              {errors.username && (
                 <p className="mt-1 font-wa" style={{ fontSize: '11px', color: '#c53030' }}>
-                  {errors.email.message}
+                  {errors.username.message}
+                </p>
+              )}
+            </div>
+
+            <div className="relative">
+              <label
+                className="absolute top-0 left-0 font-wa"
+                style={{ fontSize: '12px', color: errors.date_of_birth ? '#c53030' : '#00a884', fontWeight: 500 }}
+              >
+                Date of birth
+              </label>
+              <input
+                {...registerField('date_of_birth')}
+                type="date"
+                autoComplete="bday"
+                max={todayIso}
+                className="auth-input font-wa"
+                style={{ paddingTop: '20px', borderColor: errors.date_of_birth ? '#c53030' : undefined }}
+              />
+              {errors.date_of_birth && (
+                <p className="mt-1 font-wa" style={{ fontSize: '11px', color: '#c53030' }}>
+                  {errors.date_of_birth.message}
                 </p>
               )}
             </div>

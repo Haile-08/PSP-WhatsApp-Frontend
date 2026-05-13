@@ -6,9 +6,11 @@ export const authApi = createApi({
   baseQuery,
   endpoints: (builder) => ({
     login: builder.mutation({
-      query: ({ email, password }) => {
+      // `phone` should be E.164 (e.g. +525512345678). The OAuth2
+      // password-grant convention keeps the form key `username`.
+      query: ({ phone, password }) => {
         const form = new URLSearchParams()
-        form.append('username', email)
+        form.append('username', phone)
         form.append('password', password)
         return {
           url: '/auth/login',
@@ -19,6 +21,7 @@ export const authApi = createApi({
       },
     }),
     register: builder.mutation({
+      // body: { phone, username, password, date_of_birth: 'YYYY-MM-DD' }
       query: (body) => ({
         url: '/auth/register',
         method: 'POST',
@@ -28,7 +31,15 @@ export const authApi = createApi({
     me: builder.query({
       query: () => '/auth/me',
     }),
+    conversation: builder.query({
+      query: () => '/auth/conversation',
+    }),
   }),
 })
 
-export const { useLoginMutation, useRegisterMutation, useMeQuery } = authApi
+export const {
+  useLoginMutation,
+  useRegisterMutation,
+  useMeQuery,
+  useConversationQuery,
+} = authApi

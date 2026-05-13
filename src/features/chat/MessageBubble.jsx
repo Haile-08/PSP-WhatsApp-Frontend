@@ -47,7 +47,68 @@ function BubbleTimestamp({ isoString, status, isOutgoing }) {
   )
 }
 
-export default function MessageBubble({ message, showTail, isOutgoing }) {
+function ConsentButtons({ active, onAccept, onRefuse }) {
+  const baseStyle = {
+    flex: 1,
+    padding: '8px 12px',
+    borderRadius: '6px',
+    fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
+    fontSize: '14px',
+    fontWeight: 500,
+    border: '1px solid #d1d7db',
+    cursor: active ? 'pointer' : 'not-allowed',
+    opacity: active ? 1 : 0.55,
+    transition: 'background-color 0.15s ease',
+  }
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        gap: '6px',
+        marginTop: '10px',
+        paddingTop: '8px',
+        borderTop: '1px solid rgba(0,0,0,0.08)',
+      }}
+    >
+      <button
+        type="button"
+        disabled={!active}
+        onClick={active ? onAccept : undefined}
+        style={{
+          ...baseStyle,
+          backgroundColor: '#00a884',
+          color: '#ffffff',
+          borderColor: '#00a884',
+        }}
+      >
+        Acepto
+      </button>
+      <button
+        type="button"
+        disabled={!active}
+        onClick={active ? onRefuse : undefined}
+        style={{
+          ...baseStyle,
+          backgroundColor: '#ffffff',
+          color: '#54656f',
+        }}
+      >
+        Rechazo
+      </button>
+    </div>
+  )
+}
+
+export default function MessageBubble({
+  message,
+  showTail,
+  isOutgoing,
+  showConsentButtons = false,
+  consentActive = false,
+  onConsentAccept,
+  onConsentRefuse,
+}) {
   const isStreaming = message.status === 'streaming'
   const content = message.content || message.text || ''
   const isEmptyStreaming = isStreaming && !content
@@ -100,6 +161,13 @@ export default function MessageBubble({ message, showTail, isOutgoing }) {
         ) : (
           <div className="bubble-markdown">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+            {showConsentButtons && (
+              <ConsentButtons
+                active={consentActive}
+                onAccept={onConsentAccept}
+                onRefuse={onConsentRefuse}
+              />
+            )}
             <BubbleTimestamp
               isoString={message.created_at || message.timestamp}
               status={message.status}
