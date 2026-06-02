@@ -1,0 +1,341 @@
+/* ============================================================
+   AUTH — Login / Register, split-screen.
+   Dark editorial theme + GREEN accent, lifted from the Vela
+   landing (vela.css). Scoped under .auth-page so it never
+   touches the chat app. Left aside = green gradient with the
+   diagonal "blueprint" hatch lines from the landing CTA, but
+   green. Right = the form.
+   ============================================================ */
+.auth-page {
+  /* surfaces */
+  --bg:      #121212;
+  --panel:   #161616;
+  --panel-2: #1a1a1a;
+  --panel-3: #1f1f1f;
+
+  /* hairlines */
+  --line:        rgba(255, 255, 255, 0.075);
+  --line-2:      rgba(255, 255, 255, 0.12);
+  --line-strong: rgba(255, 255, 255, 0.22);
+
+  /* text */
+  --tx:   #edf0f2;
+  --tx-2: #9aa1a9;
+  --tx-3: #5c636c;
+
+  /* accent — GREEN */
+  --accent:      #10b981;
+  --accent-soft: color-mix(in oklab, var(--accent) 16%, transparent);
+  --accent-line: color-mix(in oklab, var(--accent) 38%, transparent);
+  --accent-tx:   color-mix(in oklab, var(--accent) 82%, white 18%);
+  --danger:      #f1623f;
+
+  position: fixed;
+  inset: 0;
+  display: grid;
+  overflow: auto;
+  background: var(--bg);
+  color: var(--tx);
+  font-family: "neue-haas-grotesk-display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* dot grid behind everything */
+.auth-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1.4px) 0 0 / 22px 22px;
+}
+
+.auth-page * { box-sizing: border-box; }
+.auth-page ::selection { background: var(--accent); color: #05140d; }
+
+/* ---------- the card ---------- */
+.auth-shell {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-height: 100%;
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  background: var(--panel);
+  overflow: hidden;
+}
+
+/* =============== LEFT ASIDE — green gradient + hatch lines =============== */
+.auth-aside {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 40px;
+  padding: 44px 44px 48px;
+  min-height: 560px;
+  color: #eafff6;
+  /* green-tinted dashed "blueprint" lines, lifted from the landing */
+  --dash: rgba(190, 255, 226, 0.30);
+  --dh: repeating-linear-gradient(90deg, var(--dash) 0 2px, transparent 2px 6px);
+  --dv: repeating-linear-gradient(180deg, var(--dash) 0 2px, transparent 2px 6px);
+  background:
+    radial-gradient(120% 90% at 0% 100%, color-mix(in oklab, var(--accent) 62%, #04140d) 0%, transparent 60%),
+    linear-gradient(155deg, #0c5a3d 0%, #093c2a 48%, #07241a 100%);
+}
+
+/* diagonal blueprint hatch — the "lines", tinted green */
+.auth-aside::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(190, 255, 226, 0.10) 0 1px,
+    transparent 1px 9px
+  );
+  mask-image: linear-gradient(160deg, #000 0%, rgba(0, 0, 0, 0.25) 70%, transparent 100%);
+}
+
+.auth-aside > * { position: relative; z-index: 1; }
+
+.auth-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.auth-brand .mark { width: 24px; height: 24px; flex: none; }
+
+.auth-aside-copy { width: 100%; }
+
+/* heading + subtitle, side by side like the image */
+.auth-aside-head {
+  display: flex;
+  align-items: flex-end;
+  gap: 28px;
+}
+.auth-aside-title {
+  flex: 0 1 auto;
+  font-size: clamp(34px, 3.6vw, 50px);
+  font-weight: 600;
+  line-height: 1.03;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+.auth-aside-sub {
+  flex: 1 1 0;
+  max-width: 26ch;
+  padding-bottom: 6px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: rgba(234, 255, 246, 0.70);
+}
+
+/* step cards — dashed blueprint borders, like the landing */
+.auth-steps {
+  display: flex;
+  gap: 14px;
+  margin-top: 38px;
+}
+.auth-step {
+  flex: 1;
+  min-width: 0;
+  padding: 20px 18px;
+  border-radius: 18px;
+  background-color: rgba(255, 255, 255, 0.035);
+  /* rounded dashed frame, green-tinted like the landing's blueprint lines */
+  border: 1.5px dashed var(--dash);
+}
+.auth-step.is-active {
+  background-color: rgba(255, 255, 255, 0.96);
+  color: #07241a;
+  border-color: transparent;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.30);
+}
+.auth-step-num {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 600;
+  color: #eafff6;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(190, 255, 226, 0.22);
+}
+.auth-step.is-active .auth-step-num {
+  color: #eafff6;
+  background: #0c5a3d;
+  border-color: transparent;
+}
+.auth-step-title {
+  margin-top: 16px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: inherit;
+}
+.auth-step:not(.is-active) .auth-step-title { color: rgba(234, 255, 246, 0.78); }
+
+/* =============== RIGHT MAIN — the form =============== */
+.auth-main {
+  padding: 48px clamp(28px, 4vw, 52px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.auth-main > * {
+  width: 100%;
+  max-width: 340px;
+}
+
+.auth-main-head {
+  margin-bottom: 24px;
+  text-align: center;
+}
+.auth-main-head h1 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.auth-main-head p {
+  margin-top: 7px;
+  font-size: 13px;
+  color: var(--tx-2);
+}
+
+.auth-server-error {
+  margin-bottom: 18px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #ffd9cd;
+  background: color-mix(in oklab, var(--danger) 14%, var(--panel-2));
+  border: 1px solid color-mix(in oklab, var(--danger) 42%, transparent);
+}
+
+.auth-field { position: relative; }
+.auth-field + .auth-field { margin-top: 18px; }
+.auth-label {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--tx-2);
+}
+.auth-label.has-error { color: var(--danger); }
+
+/* dark text input */
+.auth-control,
+.auth-page .PhoneInputInput {
+  width: 100%;
+  height: 42px;
+  padding: 0 13px;
+  font-size: 13.5px;
+  color: var(--tx);
+  background: var(--panel-2);
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+.auth-control::placeholder,
+.auth-page .PhoneInputInput::placeholder { color: var(--tx-3); }
+.auth-control:focus,
+.auth-page .PhoneInputInput:focus {
+  border-color: var(--accent-line);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.auth-control.has-error { border-color: color-mix(in oklab, var(--danger) 60%, transparent); }
+/* native date picker icon on a dark field */
+.auth-control[type="date"] { color-scheme: dark; }
+
+/* phone input wrapper */
+.auth-page .PhoneInput {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.auth-page .PhoneInputCountry {
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+.auth-page .PhoneInputCountrySelectArrow { color: var(--tx-2); }
+.auth-page .PhoneInputInput { padding-left: 14px; }
+.auth-phone-error .PhoneInputInput,
+.auth-phone-error .PhoneInputCountry {
+  border-color: color-mix(in oklab, var(--danger) 60%, transparent);
+}
+
+/* show/hide password toggle */
+.auth-pw-toggle {
+  position: absolute;
+  top: 31px;
+  right: 12px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--tx-2);
+}
+.auth-pw-toggle:hover { color: var(--tx); }
+
+.auth-error {
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: var(--danger);
+}
+
+/* submit */
+.auth-submit {
+  width: 100%;
+  height: 46px;
+  margin-top: 26px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #061a12;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: filter 0.2s, opacity 0.2s;
+}
+.auth-submit:hover { filter: brightness(1.06); }
+.auth-submit:disabled { cursor: default; }
+
+.auth-alt {
+  margin-top: 22px;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--tx-2);
+}
+.auth-alt a {
+  color: var(--accent-tx);
+  font-weight: 500;
+  text-decoration: none;
+}
+.auth-alt a:hover { text-decoration: underline; }
+
+/* =============== responsive =============== */
+@media (max-width: 800px) {
+  .auth-shell { grid-template-columns: 1fr; }
+  .auth-aside { min-height: 0; gap: 28px; padding: 36px 32px; }
+  .auth-aside-head { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .auth-aside-sub { max-width: none; padding-bottom: 0; }
+}

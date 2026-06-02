@@ -5,6 +5,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import AdminPage from './features/admin/AdminPage'
 import LoginPage from './features/auth/LoginPage'
 import RegisterPage from './features/auth/RegisterPage'
+import LandingPage from './features/landing/LandingPage'
 import MainLayout from './MainLayout'
 
 export default function App() {
@@ -12,6 +13,7 @@ export default function App() {
     <Provider store={store}>
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route
@@ -23,7 +25,7 @@ export default function App() {
             }
           />
           <Route
-            path="/*"
+            path="/chat/*"
             element={
               <ProtectedRoute>
                 <MainLayout />

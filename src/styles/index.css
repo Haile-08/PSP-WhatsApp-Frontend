@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Display serif used by the Vela landing hero (className="instrument") */
+.instrument {
+  font-family: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+}
+
 @keyframes spin {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }

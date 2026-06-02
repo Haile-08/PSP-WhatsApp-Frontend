@@ -16,7 +16,7 @@ export default function ProtectedRoute({ children, requireAdmin = false }) {
   if (isFetching && !me) return null
 
   if (requireAdmin) {
-    if (me && me.role !== 'admin') return <Navigate to="/" replace />
+    if (me && me.role !== 'admin') return <Navigate to="/chat" replace />
   } else if (me && me.role === 'admin') {
     return <Navigate to="/admin" replace />
   }

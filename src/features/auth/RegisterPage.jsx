@@ -8,6 +8,25 @@ import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
 import { useRegisterMutation, useLoginMutation } from './authApi'
 import { setCredentials } from './authSlice'
+import './auth.css'
+
+/* The four-point Vela "sail" mark, shared with the landing. */
+function VelaMark({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M12 1.5C12 7 17 12 22.5 12C17 12 12 17 12 22.5C12 17 7 12 1.5 12C7 12 12 7 12 1.5Z"
+        fill="var(--accent)"
+      />
+    </svg>
+  )
+}
+
+const STEPS = [
+  'Sign up your account',
+  'Verify your number',
+  'Start chatting with Vela',
+]
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
 
@@ -74,7 +93,7 @@ export default function RegisterPage() {
       // immediately log in to obtain the bearer token.
       const tokenResp = await login({ phone: data.phone, password: data.password }).unwrap()
       dispatch(setCredentials(tokenResp))
-      navigate('/')
+      navigate('/chat')
     } catch (err) {
       const detail = err?.data?.detail
       setServerError(
@@ -88,38 +107,46 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col" style={{ backgroundColor: '#f0f2f5' }}>
-      <div className="w-full h-[120px]" style={{ backgroundColor: '#00a884' }} />
-
-      <div className="flex-1 flex items-start justify-center" style={{ marginTop: '-40px' }}>
-        <div
-          className="w-full bg-white rounded"
-          style={{ maxWidth: '500px', boxShadow: '0 2px 8px rgba(0,0,0,0.15)', padding: '40px 48px 48px' }}
-        >
-          <div className="text-center mb-8">
-            <h1 className="font-wa font-medium" style={{ fontSize: '22px', color: '#00a884' }}>
-              PSP Assist
-            </h1>
-            <p className="mt-2 font-wa" style={{ fontSize: '16px', color: '#667781' }}>
-              Sign up with your phone number to get started.
-            </p>
+    <div className="auth-page">
+      <div className="auth-shell">
+        {/* LEFT — green gradient aside with the landing's hatch lines */}
+        <aside className="auth-aside">
+          <div className="auth-brand">
+            <VelaMark className="mark" />
+            <span>Vela</span>
           </div>
 
-          {serverError && (
-            <div
-              className="mb-4 rounded px-3 py-2 font-wa"
-              style={{ backgroundColor: '#fde8e8', color: '#c53030', fontSize: '13px' }}
-            >
-              {serverError}
+          <div className="auth-aside-copy">
+            <div className="auth-aside-head">
+              <h2 className="auth-aside-title">Get Started with Us</h2>
+              <p className="auth-aside-sub">
+                Complete these easy steps to register your account.
+              </p>
             </div>
-          )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="relative">
-              <label
-                className="absolute top-0 left-0 font-wa"
-                style={{ fontSize: '12px', color: errors.phone ? '#c53030' : '#00a884', fontWeight: 500 }}
-              >
+            <div className="auth-steps">
+              {STEPS.map((title, i) => (
+                <div key={title} className={i === 0 ? 'auth-step is-active' : 'auth-step'}>
+                  <span className="auth-step-num">{i + 1}</span>
+                  <p className="auth-step-title">{title}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </aside>
+
+        {/* RIGHT — the form */}
+        <main className="auth-main">
+          <div className="auth-main-head">
+            <h1>Sign up account</h1>
+            <p>Enter your details to create your account.</p>
+          </div>
+
+          {serverError && <div className="auth-server-error">{serverError}</div>}
+
+          <form onSubmit={handleSubmit(onSubmit)} noValidate>
+            <div className="auth-field">
+              <label className={errors.phone ? 'auth-label has-error' : 'auth-label'}>
                 Phone number
               </label>
               <Controller
@@ -132,23 +159,15 @@ export default function RegisterPage() {
                     defaultCountry="MX"
                     countryCallingCodeEditable={false}
                     placeholder="55 1234 5678"
-                    className="auth-input font-wa"
-                    style={{ paddingTop: '20px', borderColor: errors.phone ? '#c53030' : undefined }}
+                    className={errors.phone ? 'auth-phone-error' : undefined}
                   />
                 )}
               />
-              {errors.phone && (
-                <p className="mt-1 font-wa" style={{ fontSize: '11px', color: '#c53030' }}>
-                  {errors.phone.message}
-                </p>
-              )}
+              {errors.phone && <p className="auth-error">{errors.phone.message}</p>}
             </div>
 
-            <div className="relative">
-              <label
-                className="absolute top-0 left-0 font-wa"
-                style={{ fontSize: '12px', color: errors.username ? '#c53030' : '#00a884', fontWeight: 500 }}
-              >
+            <div className="auth-field">
+              <label className={errors.username ? 'auth-label has-error' : 'auth-label'}>
                 Username
               </label>
               <input
@@ -157,21 +176,13 @@ export default function RegisterPage() {
                 autoComplete="username"
                 maxLength={50}
                 placeholder="Your name"
-                className="auth-input font-wa"
-                style={{ paddingTop: '20px', borderColor: errors.username ? '#c53030' : undefined }}
+                className={errors.username ? 'auth-control has-error' : 'auth-control'}
               />
-              {errors.username && (
-                <p className="mt-1 font-wa" style={{ fontSize: '11px', color: '#c53030' }}>
-                  {errors.username.message}
-                </p>
-              )}
+              {errors.username && <p className="auth-error">{errors.username.message}</p>}
             </div>
 
-            <div className="relative">
-              <label
-                className="absolute top-0 left-0 font-wa"
-                style={{ fontSize: '12px', color: errors.date_of_birth ? '#c53030' : '#00a884', fontWeight: 500 }}
-              >
+            <div className="auth-field">
+              <label className={errors.date_of_birth ? 'auth-label has-error' : 'auth-label'}>
                 Date of birth
               </label>
               <input
@@ -179,65 +190,43 @@ export default function RegisterPage() {
                 type="date"
                 autoComplete="bday"
                 max={todayIso}
-                className="auth-input font-wa"
-                style={{ paddingTop: '20px', borderColor: errors.date_of_birth ? '#c53030' : undefined }}
+                className={errors.date_of_birth ? 'auth-control has-error' : 'auth-control'}
               />
-              {errors.date_of_birth && (
-                <p className="mt-1 font-wa" style={{ fontSize: '11px', color: '#c53030' }}>
-                  {errors.date_of_birth.message}
-                </p>
-              )}
+              {errors.date_of_birth && <p className="auth-error">{errors.date_of_birth.message}</p>}
             </div>
 
-            <div className="relative">
-              <label
-                className="absolute top-0 left-0 font-wa"
-                style={{ fontSize: '12px', color: errors.password ? '#c53030' : '#00a884', fontWeight: 500 }}
-              >
+            <div className="auth-field">
+              <label className={errors.password ? 'auth-label has-error' : 'auth-label'}>
                 Password
               </label>
               <input
                 {...registerField('password')}
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="new-password"
-                className="auth-input font-wa"
-                style={{ paddingTop: '20px', paddingRight: '40px', borderColor: errors.password ? '#c53030' : undefined }}
+                placeholder="Enter your password"
+                className={errors.password ? 'auth-control has-error' : 'auth-control'}
+                style={{ paddingRight: '54px' }}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-0 font-wa"
-                style={{ top: '50%', transform: 'translateY(-25%)', background: 'none', border: 'none', cursor: 'pointer', color: '#667781', fontSize: '12px', padding: '0 4px' }}
+                className="auth-pw-toggle"
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? 'Hide' : 'Show'}
               </button>
-              {errors.password && (
-                <p className="mt-1 font-wa" style={{ fontSize: '11px', color: '#c53030' }}>
-                  {errors.password.message}
-                </p>
-              )}
+              {errors.password && <p className="auth-error">{errors.password.message}</p>}
             </div>
 
-            <div className="pt-4">
-              <button
-                type="submit"
-                disabled={isRegistering}
-                className="auth-btn font-wa"
-                style={{ opacity: isRegistering ? 0.7 : 1 }}
-              >
-                {isRegistering ? 'Creating account…' : 'Create account'}
-              </button>
-            </div>
+            <button type="submit" disabled={isRegistering} className="auth-submit" style={{ opacity: isRegistering ? 0.7 : 1 }}>
+              {isRegistering ? 'Creating account…' : 'Create account'}
+            </button>
           </form>
 
-          <p className="mt-6 text-center font-wa" style={{ fontSize: '14px', color: '#667781' }}>
-            Already have an account?{' '}
-            <Link to="/login" style={{ color: '#00a884', fontWeight: 500 }}>
-              Sign in
-            </Link>
+          <p className="auth-alt">
+            Already have an account? <Link to="/login">Sign in</Link>
           </p>
-        </div>
+        </main>
       </div>
     </div>
   )

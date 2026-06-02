@@ -1,0 +1,160 @@
+/* ============================================================
+   Vela landing — strictly flat, minimal design tokens.
+   Retune the entire look from here.
+   ============================================================ */
+:root {
+  /* Color — 4 total. Border/hover are transparencies of these, not new hues. */
+  --vela-bg: #f4f3ee;          /* off-white surface            */
+  --vela-text: #1a1a1a;        /* near-black (never pure black) */
+  --vela-muted: #6b6b6b;       /* secondary text               */
+  --vela-accent: #0f7a52;      /* single accent, used sparingly */
+
+  --vela-border: rgba(26, 26, 26, 0.14);
+  --vela-hover: rgba(26, 26, 26, 0.035);
+
+  /* Radius */
+  --vela-radius: 7px;
+
+  /* Space */
+  --vela-gap-xs: 8px;
+  --vela-gap-sm: 16px;
+  --vela-gap-md: 28px;
+  --vela-gap-lg: 56px;
+  --vela-section-y: 112px;
+  --vela-maxw: 720px;
+
+  /* Motion */
+  --vela-transition: 0.15s ease;
+}
+
+.vela-landing {
+  background: var(--vela-bg);
+  color: var(--vela-text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 16.5px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+.vela-section {
+  max-width: var(--vela-maxw);
+  margin: 0 auto;
+  padding: var(--vela-section-y) var(--vela-gap-md);
+}
+
+.vela-section + .vela-section {
+  border-top: 1px solid var(--vela-border);
+}
+
+.vela-eyebrow {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--vela-accent);
+  margin: 0 0 var(--vela-gap-sm);
+}
+
+.vela-h2 {
+  font-size: 34px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  margin: 0 0 var(--vela-gap-sm);
+}
+
+.vela-lead {
+  color: var(--vela-muted);
+  margin: 0 0 var(--vela-gap-lg);
+  max-width: 56ch;
+}
+
+/* Steps — thin-bordered rows, no cards/shadows */
+.vela-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--vela-border);
+  border-radius: var(--vela-radius);
+}
+
+.vela-step {
+  display: flex;
+  gap: var(--vela-gap-md);
+  padding: var(--vela-gap-md);
+}
+
+.vela-step + .vela-step {
+  border-top: 1px solid var(--vela-border);
+}
+
+.vela-step-num {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--vela-accent);
+}
+
+.vela-step-title {
+  font-weight: 600;
+  margin: 0 0 var(--vela-gap-xs);
+}
+
+.vela-step-body {
+  color: var(--vela-muted);
+  margin: 0;
+}
+
+/* Contact / CTA */
+.vela-form {
+  display: flex;
+  gap: var(--vela-gap-sm);
+  flex-wrap: wrap;
+}
+
+.vela-input {
+  flex: 1 1 260px;
+  font: inherit;
+  color: var(--vela-text);
+  background: transparent;
+  border: 1px solid var(--vela-border);
+  border-radius: var(--vela-radius);
+  padding: 12px 16px;
+  transition: border-color var(--vela-transition);
+}
+
+.vela-input::placeholder { color: var(--vela-muted); }
+.vela-input:focus {
+  outline: none;
+  border-color: var(--vela-accent);
+}
+
+/* Buttons — flat */
+.vela-btn {
+  font: inherit;
+  font-weight: 500;
+  padding: 12px 22px;
+  border-radius: var(--vela-radius);
+  cursor: pointer;
+  transition: background var(--vela-transition), border-color var(--vela-transition);
+}
+
+.vela-btn-primary {
+  background: var(--vela-accent);
+  color: var(--vela-bg);
+  border: 1px solid var(--vela-accent);
+}
+.vela-btn-primary:hover { background: #0c6644; border-color: #0c6644; }
+
+.vela-btn-secondary {
+  background: transparent;
+  color: var(--vela-text);
+  border: 1px solid var(--vela-border);
+}
+.vela-btn-secondary:hover { background: var(--vela-hover); }
+
+.vela-note {
+  color: var(--vela-muted);
+  font-size: 14px;
+  margin: var(--vela-gap-md) 0 0;
+}
