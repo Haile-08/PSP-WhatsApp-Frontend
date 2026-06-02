@@ -15,7 +15,8 @@ export default function ChatHeader({ session }) {
       className="flex items-center justify-between shrink-0"
       style={{
         height: '60px',
-        backgroundColor: '#f0f2f5',
+        backgroundColor: '#151815',
+        borderBottom: '1px solid #262b27',
         padding: '10px 16px',
         gap: '4px',
       }}
@@ -40,7 +41,7 @@ export default function ChatHeader({ session }) {
             style={{
               fontSize: '16px',
               fontWeight: 500,
-              color: '#111b21',
+              color: '#e9edec',
               fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
               lineHeight: '21px',
             }}
@@ -51,7 +52,7 @@ export default function ChatHeader({ session }) {
             className="flex items-center"
             style={{
               fontSize: '13px',
-              color: '#667781',
+              color: '#8a958f',
               fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
               lineHeight: '18px',
               gap: '6px',
@@ -63,7 +64,8 @@ export default function ChatHeader({ session }) {
                 width: '6px',
                 height: '6px',
                 borderRadius: '50%',
-                backgroundColor: '#25d366',
+                backgroundColor: '#a3e635',
+                boxShadow: '0 0 6px rgba(163,230,53,0.8)',
                 display: 'inline-block',
               }}
             />

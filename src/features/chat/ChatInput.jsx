@@ -38,7 +38,8 @@ export default function ChatInput({ onSend, isStreaming, onCancel }) {
     <div
       className="shrink-0"
       style={{
-        backgroundColor: '#f0f2f5',
+        backgroundColor: '#151815',
+        borderTop: '1px solid #262b27',
         padding: '5px 16px 7px',
       }}
     >
@@ -65,13 +66,13 @@ export default function ChatInput({ onSend, isStreaming, onCancel }) {
         <div
           style={{
             flex: 1,
-            backgroundColor: '#ffffff',
+            backgroundColor: '#1e221e',
+            border: '1px solid #262b27',
             borderRadius: '8px',
             padding: '9px 12px',
             display: 'flex',
             alignItems: 'flex-end',
             minHeight: '42px',
-            boxShadow: '0 1px 1px rgba(11,20,26,0.06)',
           }}
         >
           <textarea
@@ -90,7 +91,7 @@ export default function ChatInput({ onSend, isStreaming, onCancel }) {
               backgroundColor: 'transparent',
               fontSize: '15px',
               lineHeight: '22px',
-              color: '#111b21',
+              color: '#e9edec',
               fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
               maxHeight: `${22 * 5 + 18}px`,
               overflowY: 'auto',
@@ -128,15 +129,16 @@ export default function ChatInput({ onSend, isStreaming, onCancel }) {
             style={{
               width: '40px',
               height: '40px',
-              backgroundColor: '#00a884',
-              color: '#ffffff',
+              backgroundColor: '#a3e635',
+              color: '#0c0e0d',
               border: 'none',
               cursor: 'pointer',
               marginBottom: '1px',
+              boxShadow: '0 0 12px rgba(163,230,53,0.35)',
               transition: 'background-color 0.15s',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#008069')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#00a884')}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#b6f04a')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#a3e635')}
           >
             <Send size={18} style={{ transform: 'translateX(-1px)' }} />
           </button>

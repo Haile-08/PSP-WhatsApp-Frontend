@@ -16,13 +16,13 @@ export default function DateSeparator({ isoString }) {
     <div className="flex justify-center my-3">
       <span
         style={{
-          backgroundColor: '#ffffff',
-          color: '#667781',
+          backgroundColor: '#1e221e',
+          color: '#8a958f',
           fontSize: '12.5px',
           fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
           padding: '5px 12px',
           borderRadius: '8px',
-          boxShadow: '0 1px 1px rgba(11,20,26,0.1)',
+          border: '1px solid #262b27',
           userSelect: 'none',
         }}
       >

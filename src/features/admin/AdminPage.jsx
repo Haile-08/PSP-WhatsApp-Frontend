@@ -57,7 +57,8 @@ function AdminHeader() {
       className="flex items-center justify-between shrink-0"
       style={{
         height: '60px',
-        backgroundColor: '#f0f2f5',
+        backgroundColor: '#151815',
+        borderBottom: '1px solid #262b27',
         padding: '10px 16px',
       }}
     >
@@ -68,7 +69,7 @@ function AdminHeader() {
             style={{
               fontSize: '16px',
               fontWeight: 500,
-              color: '#111b21',
+              color: '#e9edec',
               fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
               lineHeight: '21px',
             }}
@@ -78,7 +79,7 @@ function AdminHeader() {
           <div
             style={{
               fontSize: '13px',
-              color: '#667781',
+              color: '#8a958f',
               fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
               lineHeight: '18px',
             }}
@@ -119,7 +120,7 @@ function UserListItem({ user, selected, onClick }) {
   const subtitle = latest
     ? reasonLabel(latest.reason)
     : 'No escalations yet'
-  const subtitleColor = hasOpen ? '#e11d48' : '#667781'
+  const subtitleColor = hasOpen ? '#f87171' : '#8a958f'
   const subtitleTimestamp = latest?.created_at
   return (
     <button
@@ -132,13 +133,14 @@ function UserListItem({ user, selected, onClick }) {
         textAlign: 'left',
         gap: '12px',
         padding: '10px 13px',
-        backgroundColor: selected ? '#f0f2f5' : 'transparent',
+        backgroundColor: selected ? '#1e221e' : 'transparent',
         border: 'none',
-        borderBottom: '1px solid #f0f2f5',
+        borderBottom: '1px solid #1a1d1a',
+        borderLeft: selected ? '3px solid #a3e635' : '3px solid transparent',
         cursor: 'pointer',
       }}
       onMouseEnter={(e) => {
-        if (!selected) e.currentTarget.style.backgroundColor = '#f5f6f6'
+        if (!selected) e.currentTarget.style.backgroundColor = '#171a17'
       }}
       onMouseLeave={(e) => {
         if (!selected) e.currentTarget.style.backgroundColor = 'transparent'
@@ -151,7 +153,7 @@ function UserListItem({ user, selected, onClick }) {
             className="truncate"
             style={{
               fontSize: '17px',
-              color: '#111b21',
+              color: '#e9edec',
               fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
             }}
           >
@@ -160,7 +162,7 @@ function UserListItem({ user, selected, onClick }) {
           <span
             style={{
               fontSize: '12px',
-              color: hasOpen ? '#e11d48' : '#667781',
+              color: hasOpen ? '#f87171' : '#8a958f',
               whiteSpace: 'nowrap',
             }}
           >
@@ -191,10 +193,10 @@ function UserListItem({ user, selected, onClick }) {
                 height: '20px',
                 padding: '0 6px',
                 borderRadius: '10px',
-                backgroundColor: '#25d366',
-                color: '#ffffff',
+                backgroundColor: '#a3e635',
+                color: '#0c0e0d',
                 fontSize: '12px',
-                fontWeight: 600,
+                fontWeight: 700,
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -223,20 +225,21 @@ function UserList({ users, selectedUserId, onSelect }) {
   }, [users, query])
 
   return (
-    <div className="flex flex-col" style={{ width: '380px', borderRight: '1px solid #d1d7db', backgroundColor: '#ffffff' }}>
+    <div className="flex flex-col" style={{ width: '380px', borderRight: '1px solid #262b27', backgroundColor: '#101210' }}>
       <AdminHeader />
-      <div style={{ padding: '8px 12px', backgroundColor: '#ffffff' }}>
+      <div style={{ padding: '8px 12px', backgroundColor: '#101210' }}>
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            backgroundColor: '#f0f2f5',
+            backgroundColor: '#1e221e',
+            border: '1px solid #262b27',
             borderRadius: '8px',
             padding: '6px 12px',
           }}
         >
-          <Search size={16} color="#54656f" />
+          <Search size={16} color="#8a958f" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -248,14 +251,14 @@ function UserList({ users, selectedUserId, onSelect }) {
               backgroundColor: 'transparent',
               fontSize: '14px',
               fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
-              color: '#111b21',
+              color: '#e9edec',
             }}
           />
         </div>
       </div>
       <div style={{ flex: 1, overflowY: 'auto' }}>
         {filtered.length === 0 && (
-          <div style={{ padding: '24px', textAlign: 'center', color: '#667781', fontSize: '14px' }}>
+          <div style={{ padding: '24px', textAlign: 'center', color: '#8a958f', fontSize: '14px' }}>
             No users yet
           </div>
         )}
@@ -278,10 +281,10 @@ function ConversationHeader({ user }) {
       className="flex items-center shrink-0"
       style={{
         height: '60px',
-        backgroundColor: '#f0f2f5',
+        backgroundColor: '#151815',
         padding: '10px 16px',
         gap: '12px',
-        borderBottom: '1px solid #d1d7db',
+        borderBottom: '1px solid #262b27',
       }}
     >
       <Avatar name={user.username} size={40} />
@@ -291,7 +294,7 @@ function ConversationHeader({ user }) {
           style={{
             fontSize: '16px',
             fontWeight: 500,
-            color: '#111b21',
+            color: '#e9edec',
             fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
             lineHeight: '21px',
           }}
@@ -302,7 +305,7 @@ function ConversationHeader({ user }) {
           className="flex items-center"
           style={{
             fontSize: '13px',
-            color: '#667781',
+            color: '#8a958f',
             fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
             lineHeight: '18px',
             gap: '4px',
@@ -323,7 +326,7 @@ function ConversationPane({ user }) {
   if (isFetching && messages.length === 0) {
     return (
       <div className="flex-1 flex items-center justify-center chat-bg">
-        <span style={{ color: '#667781', fontSize: '14px' }}>Loading conversation…</span>
+        <span style={{ color: '#8a958f', fontSize: '14px' }}>Loading conversation…</span>
       </div>
     )
   }
@@ -357,7 +360,7 @@ function ConversationPane({ user }) {
       <ConversationHeader user={user} />
       <div className="flex-1 overflow-y-auto chat-bg" style={{ padding: '12px 6% 8px' }}>
         {messages.length === 0 ? (
-          <div style={{ textAlign: 'center', color: '#667781', fontSize: '13px', padding: '40px 0' }}>
+          <div style={{ textAlign: 'center', color: '#8a958f', fontSize: '13px', padding: '40px 0' }}>
             No messages in this conversation yet.
           </div>
         ) : (
@@ -367,11 +370,11 @@ function ConversationPane({ user }) {
       <div
         className="shrink-0"
         style={{
-          backgroundColor: '#f0f2f5',
+          backgroundColor: '#151815',
           padding: '14px 16px',
-          borderTop: '1px solid #d1d7db',
+          borderTop: '1px solid #262b27',
           fontSize: '12.5px',
-          color: '#667781',
+          color: '#8a958f',
           textAlign: 'center',
           fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
         }}
@@ -399,12 +402,13 @@ function EscalationCard({ escalation }) {
   return (
     <div
       style={{
-        backgroundColor: '#ffffff',
+        backgroundColor: '#1b1e1b',
         borderRadius: '8px',
         padding: '12px 14px',
         marginBottom: '10px',
-        boxShadow: '0 1px 0.5px rgba(11,20,26,0.13)',
-        borderLeft: `4px solid ${resolved ? '#25d366' : '#e11d48'}`,
+        border: '1px solid #262b27',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.35)',
+        borderLeft: `4px solid ${resolved ? '#a3e635' : '#f87171'}`,
       }}
     >
       <div className="flex items-center justify-between" style={{ marginBottom: '4px' }}>
@@ -412,7 +416,7 @@ function EscalationCard({ escalation }) {
           style={{
             fontSize: '13.5px',
             fontWeight: 600,
-            color: '#111b21',
+            color: '#e9edec',
             fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
           }}
         >
@@ -421,8 +425,8 @@ function EscalationCard({ escalation }) {
         <span
           style={{
             fontSize: '11px',
-            color: resolved ? '#25d366' : '#e11d48',
-            fontWeight: 500,
+            color: resolved ? '#a3e635' : '#f87171',
+            fontWeight: 600,
             textTransform: 'uppercase',
             letterSpacing: '0.5px',
           }}
@@ -433,7 +437,7 @@ function EscalationCard({ escalation }) {
       <div
         style={{
           fontSize: '12px',
-          color: '#667781',
+          color: '#8a958f',
           fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
           marginBottom: '6px',
         }}
@@ -444,9 +448,10 @@ function EscalationCard({ escalation }) {
         <div
           style={{
             fontSize: '13px',
-            color: '#3b4a54',
+            color: '#c2ccc6',
             fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
-            backgroundColor: '#f0f2f5',
+            backgroundColor: '#101210',
+            border: '1px solid #262b27',
             borderRadius: '4px',
             padding: '6px 8px',
             whiteSpace: 'pre-wrap',
@@ -465,9 +470,9 @@ function EscalationCard({ escalation }) {
             disabled={isResolving}
             style={{
               fontSize: '12.5px',
-              fontWeight: 500,
-              color: '#ffffff',
-              backgroundColor: isResolving ? '#9aa7ad' : '#25d366',
+              fontWeight: 600,
+              color: '#0c0e0d',
+              backgroundColor: isResolving ? '#5c6b4a' : '#a3e635',
               border: 'none',
               borderRadius: '6px',
               padding: '6px 12px',
@@ -493,17 +498,17 @@ function EscalationsPane({ user }) {
       className="flex flex-col"
       style={{
         width: '360px',
-        borderLeft: '1px solid #d1d7db',
-        backgroundColor: '#f7f8fa',
+        borderLeft: '1px solid #262b27',
+        backgroundColor: '#0e100e',
       }}
     >
       <div
         className="shrink-0"
         style={{
           height: '60px',
-          backgroundColor: '#f0f2f5',
+          backgroundColor: '#151815',
           padding: '10px 16px',
-          borderBottom: '1px solid #d1d7db',
+          borderBottom: '1px solid #262b27',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
@@ -513,7 +518,7 @@ function EscalationsPane({ user }) {
           style={{
             fontSize: '15px',
             fontWeight: 500,
-            color: '#111b21',
+            color: '#e9edec',
             fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
           }}
         >
@@ -522,7 +527,7 @@ function EscalationsPane({ user }) {
         <div
           style={{
             fontSize: '12.5px',
-            color: openCount > 0 ? '#e11d48' : '#667781',
+            color: openCount > 0 ? '#f87171' : '#8a958f',
             fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
           }}
         >
@@ -533,12 +538,12 @@ function EscalationsPane({ user }) {
       </div>
       <div style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
         {isFetching && escalations.length === 0 && (
-          <div style={{ color: '#667781', fontSize: '13px', textAlign: 'center', padding: '16px 0' }}>
+          <div style={{ color: '#8a958f', fontSize: '13px', textAlign: 'center', padding: '16px 0' }}>
             Loading…
           </div>
         )}
         {!isFetching && escalations.length === 0 && (
-          <div style={{ color: '#667781', fontSize: '13px', textAlign: 'center', padding: '16px 0' }}>
+          <div style={{ color: '#8a958f', fontSize: '13px', textAlign: 'center', padding: '16px 0' }}>
             The agent has not escalated for this user.
           </div>
         )}
@@ -560,13 +565,13 @@ function EmptyState() {
       <div
         style={{
           fontSize: '20px',
-          color: '#41525d',
+          color: '#d6ddd9',
           fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
         }}
       >
         Select a user to view their conversation
       </div>
-      <div style={{ fontSize: '13px', color: '#667781', maxWidth: '360px', textAlign: 'center' }}>
+      <div style={{ fontSize: '13px', color: '#8a958f', maxWidth: '360px', textAlign: 'center' }}>
         When the agent escalates a turn it lands here. Pick a contact on the left
         to see the full chat and every escalation logged for that user.
       </div>
@@ -596,7 +601,7 @@ export default function AdminPage() {
         width: '100vw',
         height: '100vh',
         overflow: 'hidden',
-        backgroundColor: '#ffffff',
+        backgroundColor: '#0c0e0d',
       }}
     >
       <UserList

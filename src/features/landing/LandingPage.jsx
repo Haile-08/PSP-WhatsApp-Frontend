@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { Link } from 'react-router-dom'
 import './vela.css'
 
 /* The four-point Vela "sail" mark, reused across nav, hero, dataflow, footer. */
@@ -108,7 +109,7 @@ export default function LandingPage() {
             <a href="#rollout">Rollout</a>
           </nav>
           <div className="nav-cta">
-            <a className="btn btn--primary" href="#cta">Request access</a>
+            <Link className="btn btn--primary" to="/login">Get started</Link>
           </div>
         </div>
       </header>
@@ -127,7 +128,7 @@ export default function LandingPage() {
             <h1>The support agent that knows <span className="accent">when to escalate</span></h1>
             <p className="sub">Vela runs the low-touch half of your patient program across WhatsApp and SMS — adherence, PRO collection, triage and FAQs — and routes every clinical red flag to a human in under two minutes.</p>
             <div className="hero-actions">
-              <a className="btn btn--primary" href="#cta">Request access</a>
+              <Link className="btn btn--primary" to="/login">Get started</Link>
               <a className="btn btn--ghost" href="#architecture">See how it works</a>
             </div>
 
@@ -158,7 +159,7 @@ export default function LandingPage() {
           <div className="wrap trust-inner">
             <span className="lbl">Built on a measured standard</span>
             <div className="stack">
-              {['Claude API', 'CarePatron', 'WhatsApp Business', 'LangGraph', 'pgvector RAG', 'Langfuse'].map((s) => <span key={s}>{s}</span>)}
+              {['Gemini API', 'Healthie', 'WhatsApp Business', 'LangGraph', 'pgvector RAG', 'Langfuse'].map((s) => <span key={s}>{s}</span>)}
             </div>
           </div>
         </div>
@@ -224,7 +225,7 @@ export default function LandingPage() {
               <div className="arch-card det">
                 <div className="tophead"><span className="tag">Deterministic shell</span><span className="mono">Fully auditable</span></div>
                 <h3>The non-negotiable spine</h3>
-                <p className="lead">Consent, PROs and adverse-event escalation can never be probabilistic. These run as fixed, logged state transitions in CarePatron.</p>
+                <p className="lead">Consent, PROs and adverse-event escalation can never be probabilistic. These run as fixed, logged state transitions in Healthie.</p>
                 <ul>
                   {['Onboarding & ARCO consent', 'PRO collection — PP-NRS, DLQI, SD-NRS', 'Adverse-event detection & escalation', 'PA re-authorization packages', 'Adherence reminder cadence'].map((li) => (
                     <li key={li}>{CHECK} {li}</li>
@@ -248,7 +249,7 @@ export default function LandingPage() {
               <div className="df-col read">
                 <div className="ct">Reads</div>
                 <div className="src">
-                  <div className="df-src"><b>CarePatron Pro</b><span>Patient record · prior interactions · PA status</span></div>
+                  <div className="df-src"><b>Healthie</b><span>Patient record · prior interactions · PA status</span></div>
                   <div className="df-src"><b>Vector store</b><span>Approved SOPs · scripts · escalation trees</span></div>
                   <div className="df-src"><b>Twilio WhatsApp</b><span>Inbound messages · PRO replies</span></div>
                 </div>
@@ -256,13 +257,13 @@ export default function LandingPage() {
               <div className="df-col center">
                 <div className="df-core"><VelaMark /></div>
                 <div className="ctitle">Vela Agent</div>
-                <div className="csub">Claude API + orchestrator. Handles ~60% of low-touch traffic; escalates red flags to a human.</div>
-                <span className="chip">Claude · LangGraph</span>
+                <div className="csub">Gemini API + orchestrator. Handles ~60% of low-touch traffic; escalates red flags to a human.</div>
+                <span className="chip">Gemini · LangGraph</span>
               </div>
               <div className="df-col write">
                 <div className="ct" style={{ textAlign: 'right' }}>Writes</div>
                 <div className="src">
-                  <div className="df-src"><b>CarePatron Pro</b><span>Interaction logs · PRO scores · adherence</span></div>
+                  <div className="df-src"><b>Healthie</b><span>Interaction logs · PRO scores · adherence</span></div>
                   <div className="df-src"><b>Observability</b><span>Transcripts · latency · QA scoring inputs</span></div>
                   <div className="df-src"><b>Ticketing queue</b><span>Clinical escalations · adverse events · flags</span></div>
                 </div>
@@ -328,7 +329,7 @@ export default function LandingPage() {
               <h2>Bring Vela to your program.</h2>
               <p>A viable path from 15 to 250+ patients on the same headcount — with regulatory traceability on every controlled step.</p>
               <div className="cta-actions">
-                <a className="btn btn--primary" href="#">Request access <svg className="arrow" width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg></a>
+                <Link className="btn btn--primary" to="/login">Get started <svg className="arrow" width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg></Link>
                 <a className="btn btn--ghost" href="#architecture">Read the spec</a>
               </div>
             </div>
@@ -361,7 +362,7 @@ export default function LandingPage() {
               </div>
               <div className="fcol">
                 <h5>Contact</h5>
-                <a href="#">Request access</a>
+                <Link to="/login">Get started</Link>
                 <a href="#">Operations team</a>
                 <a href="#">Pharmacovigilance</a>
               </div>
@@ -369,7 +370,7 @@ export default function LandingPage() {
           </div>
           <div className="footer-bot">
             <span className="mono">© 2026 Vela · Patient Support Program</span>
-            <span className="built"><VelaMark /> Built on Claude</span>
+            <span className="built"><VelaMark /> Built on Gemini</span>
           </div>
         </div>
       </footer>

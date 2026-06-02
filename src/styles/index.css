@@ -34,8 +34,8 @@
   body {
     font-family: 'Segoe UI', Helvetica, 'Helvetica Neue', Arial, sans-serif;
     font-size: 14.2px;
-    color: #111b21;
-    background-color: #efeae2;
+    color: #e9edec;
+    background-color: #0c0e0d;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -57,17 +57,17 @@
     border-radius: 3px;
   }
   *:hover::-webkit-scrollbar-thumb {
-    background: rgba(17, 27, 33, 0.18);
+    background: rgba(233, 237, 236, 0.14);
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(17, 27, 33, 0.35) !important;
+    background: rgba(233, 237, 236, 0.28) !important;
   }
 }
 
 @layer components {
-  /* ── App shell with teal strip ── */
+  /* ── App shell with neon strip ── */
   .wa-shell-bg {
-    background: linear-gradient(to bottom, #00a884 0, #00a884 127px, #d9dbd5 127px, #d9dbd5 100%);
+    background: linear-gradient(to bottom, #a3e635 0, #a3e635 127px, #0c0e0d 127px, #0c0e0d 100%);
   }
 
   /* ── Message bubble tails ── */
@@ -85,7 +85,7 @@
     width: 8px;
     height: 13px;
     background: transparent;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M1,0 Q8,0 8,13 Q8,13 0,13 L0,1 Q0,0 1,0Z' fill='%23d9fdd3'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M1,0 Q8,0 8,13 Q8,13 0,13 L0,1 Q0,0 1,0Z' fill='%2314361f'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-size: 100% 100%;
   }
@@ -105,7 +105,7 @@
     left: -8px;
     width: 8px;
     height: 13px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M7,0 Q0,0 0,13 Q0,13 8,13 L8,1 Q8,0 7,0Z' fill='%23ffffff'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M7,0 Q0,0 0,13 Q0,13 8,13 L8,1 Q8,0 7,0Z' fill='%231e221e'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-size: 100% 100%;
   }
@@ -117,32 +117,36 @@
     animation: wa-fade-in 120ms ease-out;
   }
 
-  /* ── Chat background with doodle pattern ── */
+  /* ── Chat background: deep black with a soft neon-green glow ── */
   .chat-bg {
-    background-color: #efeae2;
-    background-image: url('/wa-pattern.svg');
-    background-repeat: repeat;
-    background-size: 400px 400px;
+    background-color: #0c0e0d;
+    background-image:
+      radial-gradient(900px 520px at 78% 18%, rgba(163, 230, 53, 0.10), transparent 60%),
+      radial-gradient(700px 460px at 12% 92%, rgba(163, 230, 53, 0.06), transparent 60%);
+    background-repeat: no-repeat;
+    background-attachment: local;
   }
 
   /* ── Icon button with circular hover ── */
   .icon-btn {
     @apply flex items-center justify-center w-10 h-10 rounded-full cursor-pointer transition-colors duration-150;
-    color: #54656f;
+    color: #8a958f;
     border: none;
     background: transparent;
   }
   .icon-btn:hover {
-    background-color: rgba(134, 150, 160, 0.15);
+    background-color: rgba(163, 230, 53, 0.12);
+    color: #a3e635;
   }
   .icon-btn:active {
-    background-color: rgba(134, 150, 160, 0.28);
+    background-color: rgba(163, 230, 53, 0.22);
   }
 
   /* ── Unread badge ── */
   .unread-badge {
-    @apply flex items-center justify-center min-w-[20px] h-5 rounded-full text-white text-xs font-medium px-[6px];
-    background-color: #25d366;
+    @apply flex items-center justify-center min-w-[20px] h-5 rounded-full text-xs font-semibold px-[6px];
+    background-color: #a3e635;
+    color: #0c0e0d;
     font-size: 11px;
     line-height: 1;
     letter-spacing: 0;
@@ -157,22 +161,22 @@
     border-radius: 14px;
     font-size: 13px;
     line-height: 1;
-    color: #111b21;
-    background-color: #f0f2f5;
+    color: #c2ccc6;
+    background-color: #1e221e;
     border: none;
     cursor: pointer;
     white-space: nowrap;
     transition: background-color 0.15s;
   }
   .wa-pill:hover {
-    background-color: #e4e6eb;
+    background-color: #262b27;
   }
   .wa-pill-active {
-    background-color: #d9fdd3;
-    color: #0a332c;
+    background-color: rgba(163, 230, 53, 0.18);
+    color: #c4f06a;
   }
   .wa-pill-active:hover {
-    background-color: #c9f5c1;
+    background-color: rgba(163, 230, 53, 0.26);
   }
 
   /* ── Typing indicator (3 bouncing dots) ── */
@@ -186,7 +190,7 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background-color: #8696a0;
+    background-color: #a3e635;
     animation: wa-typing 1.2s infinite ease-in-out;
   }
   .wa-typing span:nth-child(2) { animation-delay: 0.15s; }
@@ -198,17 +202,21 @@
     font-size: 15px;
     transition: border-color 0.2s;
   }
+  .auth-input::placeholder {
+    color: #6b746f;
+  }
   .auth-input:focus {
-    border-bottom-color: #00a884;
+    border-bottom-color: #a3e635;
   }
 
   /* ── Auth primary button ── */
   .auth-btn {
-    @apply w-full bg-wa-accent text-white font-medium py-3 rounded text-sm tracking-wide uppercase;
+    @apply w-full bg-wa-accent font-semibold py-3 rounded text-sm tracking-wide uppercase;
+    color: #0c0e0d;
     transition: background-color 0.2s;
   }
   .auth-btn:hover {
-    background-color: #008069;
+    background-color: #b6f04a;
   }
 
   /* ── Markdown inside bubbles ── */
@@ -228,13 +236,14 @@
   }
   .bubble-markdown code {
     font-family: Consolas, 'Courier New', monospace;
-    background: rgba(0, 0, 0, 0.06);
+    background: rgba(163, 230, 53, 0.12);
+    color: #c4f06a;
     padding: 1px 4px;
     border-radius: 3px;
     font-size: 12.5px;
   }
   .bubble-markdown pre {
-    background: rgba(0, 0, 0, 0.06);
+    background: rgba(0, 0, 0, 0.35);
     border-radius: 6px;
     padding: 8px 10px;
     overflow-x: auto;
@@ -252,7 +261,7 @@
     font-style: italic;
   }
   .bubble-markdown a {
-    color: #027eb5;
+    color: #a3e635;
     text-decoration: underline;
     word-break: break-all;
   }
@@ -264,9 +273,9 @@
     margin: 4px 0 2px;
   }
   .bubble-markdown blockquote {
-    border-left: 3px solid #00a884;
+    border-left: 3px solid #a3e635;
     padding-left: 8px;
     margin: 4px 0;
-    color: #3b4a54;
+    color: #b3bdb7;
   }
 }

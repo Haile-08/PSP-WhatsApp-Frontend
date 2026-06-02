@@ -22,13 +22,13 @@ function EncryptionNotice() {
       <span
         className="flex items-center"
         style={{
-          backgroundColor: '#fff3c4',
-          color: '#54656f',
+          backgroundColor: 'rgba(163,230,53,0.10)',
+          color: '#b3bdb7',
           fontSize: '12.5px',
           fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
           padding: '6px 12px',
           borderRadius: '7px',
-          boxShadow: '0 1px 0.5px rgba(11,20,26,0.13)',
+          border: '1px solid rgba(163,230,53,0.18)',
           gap: '6px',
           maxWidth: '85%',
           textAlign: 'center',

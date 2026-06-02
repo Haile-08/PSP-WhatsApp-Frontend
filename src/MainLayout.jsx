@@ -20,7 +20,7 @@ export default function MainLayout() {
         width: '100vw',
         height: '100vh',
         overflow: 'hidden',
-        backgroundColor: '#ffffff',
+        backgroundColor: '#0c0e0d',
       }}
     >
       <div className="flex flex-col flex-1" style={{ height: '100%', overflow: 'hidden' }}>

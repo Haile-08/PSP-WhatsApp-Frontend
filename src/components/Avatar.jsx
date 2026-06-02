@@ -26,7 +26,7 @@ export default function Avatar({ name = '', size = 49, isBot = false }) {
           height: size,
           minWidth: size,
           borderRadius: '50%',
-          background: 'linear-gradient(135deg, #00a884 0%, #008069 100%)',
+          background: 'linear-gradient(135deg, #a3e635 0%, #6fae12 100%)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -38,7 +38,7 @@ export default function Avatar({ name = '', size = 49, isBot = false }) {
           height={size * 0.5}
           viewBox="0 0 24 24"
           fill="none"
-          stroke="white"
+          stroke="#0c0e0d"
           strokeWidth="1.8"
           strokeLinecap="round"
           strokeLinejoin="round"

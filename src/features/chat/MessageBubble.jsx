@@ -22,7 +22,7 @@ function BubbleTimestamp({ isoString, status, isOutgoing }) {
       <span
         style={{
           fontSize: '11px',
-          color: '#667781',
+          color: isOutgoing ? 'rgba(233,247,223,0.55)' : '#8a958f',
           fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
           lineHeight: '15px',
           whiteSpace: 'nowrap',
@@ -33,13 +33,13 @@ function BubbleTimestamp({ isoString, status, isOutgoing }) {
       {isOutgoing && (
         <>
           {status === 'sending' ? (
-            <Clock size={13} color="#667781" />
+            <Clock size={13} color="rgba(233,247,223,0.55)" />
           ) : status === 'streaming' ? (
-            <Check size={15} color="#667781" />
+            <Check size={15} color="rgba(233,247,223,0.55)" />
           ) : status === 'read' ? (
-            <CheckCheck size={15} color="#53bdeb" />
+            <CheckCheck size={15} color="#a3e635" />
           ) : (
-            <CheckCheck size={15} color="#667781" />
+            <CheckCheck size={15} color="rgba(233,247,223,0.55)" />
           )}
         </>
       )}
@@ -54,8 +54,8 @@ function ConsentButtons({ active, onAccept, onRefuse }) {
     borderRadius: '6px',
     fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
     fontSize: '14px',
-    fontWeight: 500,
-    border: '1px solid #d1d7db',
+    fontWeight: 600,
+    border: '1px solid #2f352f',
     cursor: active ? 'pointer' : 'not-allowed',
     opacity: active ? 1 : 0.55,
     transition: 'background-color 0.15s ease',
@@ -68,7 +68,7 @@ function ConsentButtons({ active, onAccept, onRefuse }) {
         gap: '6px',
         marginTop: '10px',
         paddingTop: '8px',
-        borderTop: '1px solid rgba(0,0,0,0.08)',
+        borderTop: '1px solid rgba(255,255,255,0.08)',
       }}
     >
       <button
@@ -77,9 +77,9 @@ function ConsentButtons({ active, onAccept, onRefuse }) {
         onClick={active ? onAccept : undefined}
         style={{
           ...baseStyle,
-          backgroundColor: '#00a884',
-          color: '#ffffff',
-          borderColor: '#00a884',
+          backgroundColor: '#a3e635',
+          color: '#0c0e0d',
+          borderColor: '#a3e635',
         }}
       >
         Acepto
@@ -90,8 +90,8 @@ function ConsentButtons({ active, onAccept, onRefuse }) {
         onClick={active ? onRefuse : undefined}
         style={{
           ...baseStyle,
-          backgroundColor: '#ffffff',
-          color: '#54656f',
+          backgroundColor: 'transparent',
+          color: '#c2ccc6',
         }}
       >
         Rechazo
@@ -121,12 +121,13 @@ export default function MessageBubble({
     maxWidth: '65%',
     minWidth: isEmptyStreaming ? '56px' : '0',
     padding: '6px 9px 8px',
-    boxShadow: '0 1px 0.5px rgba(11,20,26,0.13)',
-    backgroundColor: isOutgoing ? '#d9fdd3' : '#ffffff',
+    boxShadow: '0 1px 1px rgba(0,0,0,0.35)',
+    backgroundColor: isOutgoing ? '#14361f' : '#1e221e',
+    border: isOutgoing ? '1px solid rgba(163,230,53,0.25)' : '1px solid #262b27',
     fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
     fontSize: '14.2px',
     lineHeight: '19px',
-    color: '#111b21',
+    color: isOutgoing ? '#e9f7df' : '#e9edec',
     wordBreak: 'break-word',
   }
 

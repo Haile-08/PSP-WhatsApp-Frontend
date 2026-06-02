@@ -111,10 +111,10 @@ export default function RegisterPage() {
       <div className="auth-shell">
         {/* LEFT — green gradient aside with the landing's hatch lines */}
         <aside className="auth-aside">
-          <div className="auth-brand">
+          <Link className="auth-brand" to="/">
             <VelaMark className="mark" />
             <span>Vela</span>
-          </div>
+          </Link>
 
           <div className="auth-aside-copy">
             <div className="auth-aside-head">
