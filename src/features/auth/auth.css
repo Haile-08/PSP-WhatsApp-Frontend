@@ -337,7 +337,5 @@
 /* =============== responsive =============== */
 @media (max-width: 800px) {
   .auth-shell { grid-template-columns: 1fr; }
-  .auth-aside { min-height: 0; gap: 28px; padding: 36px 32px; }
-  .auth-aside-head { flex-direction: column; align-items: flex-start; gap: 10px; }
-  .auth-aside-sub { max-width: none; padding-bottom: 0; }
+  .auth-aside { display: none; }
 }
