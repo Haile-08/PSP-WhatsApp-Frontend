@@ -5,11 +5,13 @@ import Avatar from '../../components/Avatar'
 import DropdownMenu from '../../components/DropdownMenu'
 import MessageBubble from '../chat/MessageBubble'
 import DateSeparator from '../chat/DateSeparator'
+import ChatInput from '../chat/ChatInput'
 import { logout } from '../auth/authSlice'
 import {
   useAdminUsersQuery,
   useAdminUserConversationQuery,
   useAdminUserEscalationsQuery,
+  useSendAdminMessageMutation,
   useResolveEscalationMutation,
 } from './adminApi'
 
@@ -321,7 +323,20 @@ function ConversationHeader({ user }) {
 
 function ConversationPane({ user }) {
   const { data, isFetching } = useAdminUserConversationQuery(user.id)
+  const [sendAdminMessage, { isLoading: isSending }] = useSendAdminMessageMutation()
   const messages = data?.messages || []
+
+  const handleSend = async (text) => {
+    const content = text.trim()
+    if (!content) return
+    try {
+      await sendAdminMessage({ userId: user.id, content }).unwrap()
+    } catch (err) {
+      // RTK Query surfaces the failure via the mutation state; the message
+      // simply won't appear if delivery failed.
+      console.error('Failed to send message', err)
+    }
+  }
 
   if (isFetching && messages.length === 0) {
     return (
@@ -367,20 +382,7 @@ function ConversationPane({ user }) {
           rendered
         )}
       </div>
-      <div
-        className="shrink-0"
-        style={{
-          backgroundColor: '#151815',
-          padding: '14px 16px',
-          borderTop: '1px solid #262b27',
-          fontSize: '12.5px',
-          color: '#8a958f',
-          textAlign: 'center',
-          fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
-        }}
-      >
-        Read-only view — admins observe the agent's conversation with the patient.
-      </div>
+      <ChatInput onSend={handleSend} isStreaming={isSending} />
     </div>
   )
 }

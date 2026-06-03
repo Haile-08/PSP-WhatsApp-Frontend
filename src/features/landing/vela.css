@@ -108,6 +108,16 @@
 .vela-page .btn .arrow { transition: transform .2s; }
 .vela-page .btn:hover .arrow { transform: translateX(3px); }
 
+.vela-page .lang-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 38px; padding: 0 14px; border-radius: 999px;
+  font-size: 13px; font-weight: 600; letter-spacing: -.01em; cursor: pointer;
+  background: transparent; color: var(--tx-2, var(--tx));
+  border: 1px solid var(--line-2); white-space: nowrap;
+  transition: border-color .2s, color .2s, background .2s;
+}
+.vela-page .lang-toggle:hover { border-color: var(--line-strong); color: var(--tx); background: rgba(255,255,255,.05); }
+
 /* =============== NAV =============== */
 .vela-page .nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
@@ -441,7 +451,7 @@
 .vela-page .esc-row .sla { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; text-align: right; }
 
 /* phases */
-.vela-page .phases { display: grid; grid-template-columns: repeat(4, 1fr); overflow: hidden; }
+.vela-page .phases { display: grid; grid-template-columns: repeat(4, 1fr); overflow: hidden; margin-top: 54px; }
 .vela-page .phase { padding: 28px 24px 30px; position: relative; }
 .vela-page .phase .pn { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--tx-3); }
 .vela-page .phase h4 { font-size: 16px; font-weight: 600; letter-spacing: -.01em; }

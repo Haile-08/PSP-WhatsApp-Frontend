@@ -27,6 +27,16 @@ export const adminApi = createApi({
       providesTags: (_r, _e, userId) => [{ type: 'AdminEscalations', id: userId }],
       pollingInterval: DETAIL_POLL_MS,
     }),
+    sendAdminMessage: builder.mutation({
+      query: ({ userId, content }) => ({
+        url: `/admin/users/${userId}/messages`,
+        method: 'POST',
+        body: { content },
+      }),
+      // Refresh the conversation immediately rather than waiting for the
+      // next poll, so the operator sees their own message appear right away.
+      invalidatesTags: (_r, _e, { userId }) => [{ type: 'AdminConversation', id: userId }],
+    }),
     resolveEscalation: builder.mutation({
       query: (escalationId) => ({
         url: `/admin/escalations/${escalationId}/resolve`,
@@ -44,5 +54,6 @@ export const {
   useAdminUsersQuery,
   useAdminUserConversationQuery,
   useAdminUserEscalationsQuery,
+  useSendAdminMessageMutation,
   useResolveEscalationMutation,
 } = adminApi

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -8,69 +8,147 @@ import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
 import { useRegisterMutation, useLoginMutation } from './authApi'
 import { setCredentials } from './authSlice'
+import { selectLang, toggleLanguage } from '../i18n/langSlice'
 import './auth.css'
 
 /* The four-point Vela "sail" mark, shared with the landing. */
 function VelaMark({ className }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M12 1.5C12 7 17 12 22.5 12C17 12 12 17 12 22.5C12 17 7 12 1.5 12C7 12 12 7 12 1.5Z"
-        fill="var(--accent)"
-      />
-    </svg>
+    <img src="/icon.svg" className={className} width="34" height="34" alt="" aria-hidden="true" />
   )
 }
 
-const STEPS = [
-  'Sign up your account',
-  'Verify your number',
-  'Start chatting with Vela',
-]
+/* All page copy, keyed by language so the shared toggle re-renders everything. */
+const COPY = {
+  en: {
+    asideTitle: 'Get Started with Us',
+    asideSub: 'Complete these easy steps to register your account.',
+    steps: ['Sign up your account', 'Verify your number', 'Start chatting with Vela'],
+    headTitle: 'Sign up account',
+    headSub: 'Enter your details to create your account.',
+    phoneLabel: 'Phone number',
+    phonePlaceholder: '55 1234 5678',
+    usernameLabel: 'Username',
+    usernamePlaceholder: 'Your name',
+    dobLabel: 'Date of birth',
+    passwordLabel: 'Password',
+    passwordPlaceholder: 'Enter your password',
+    show: 'Show',
+    hide: 'Hide',
+    showPassword: 'Show password',
+    hidePassword: 'Hide password',
+    submit: 'Create account',
+    submitting: 'Creating account…',
+    altPrefix: 'Already have an account?',
+    altLink: 'Sign in',
+    serverError: 'Registration failed. Please try again.',
+    switchTo: 'Español',
+    // validation
+    phoneRequired: 'Phone number is required',
+    phoneInvalid: 'Enter a valid phone number',
+    usernameRequired: 'Username is required',
+    usernameMax: 'Username must be 50 characters or fewer',
+    dobRequired: 'Date of birth is required',
+    dobFormat: 'Use the date picker (YYYY-MM-DD)',
+    dobFuture: 'Date of birth cannot be in the future',
+    dobOld: 'Date of birth is implausibly old',
+    pwMin: 'Password must be at least 8 characters',
+    pwMax: 'Password must be 64 characters or fewer',
+    pwUpper: 'Password must contain at least one uppercase letter',
+    pwLower: 'Password must contain at least one lowercase letter',
+    pwNumber: 'Password must contain at least one number',
+    pwSpecial: 'Password must contain at least one special character',
+  },
+  es: {
+    asideTitle: 'Comienza con nosotros',
+    asideSub: 'Completa estos sencillos pasos para registrar tu cuenta.',
+    steps: ['Registra tu cuenta', 'Verifica tu número', 'Empieza a chatear con Vela'],
+    headTitle: 'Crear cuenta',
+    headSub: 'Ingresa tus datos para crear tu cuenta.',
+    phoneLabel: 'Número de teléfono',
+    phonePlaceholder: '55 1234 5678',
+    usernameLabel: 'Nombre de usuario',
+    usernamePlaceholder: 'Tu nombre',
+    dobLabel: 'Fecha de nacimiento',
+    passwordLabel: 'Contraseña',
+    passwordPlaceholder: 'Ingresa tu contraseña',
+    show: 'Mostrar',
+    hide: 'Ocultar',
+    showPassword: 'Mostrar contraseña',
+    hidePassword: 'Ocultar contraseña',
+    submit: 'Crear cuenta',
+    submitting: 'Creando cuenta…',
+    altPrefix: '¿Ya tienes una cuenta?',
+    altLink: 'Iniciar sesión',
+    serverError: 'El registro falló. Inténtalo de nuevo.',
+    switchTo: 'English',
+    // validation
+    phoneRequired: 'El número de teléfono es obligatorio',
+    phoneInvalid: 'Ingresa un número de teléfono válido',
+    usernameRequired: 'El nombre de usuario es obligatorio',
+    usernameMax: 'El nombre de usuario debe tener 50 caracteres o menos',
+    dobRequired: 'La fecha de nacimiento es obligatoria',
+    dobFormat: 'Usa el selector de fecha (AAAA-MM-DD)',
+    dobFuture: 'La fecha de nacimiento no puede estar en el futuro',
+    dobOld: 'La fecha de nacimiento es inverosímilmente antigua',
+    pwMin: 'La contraseña debe tener al menos 8 caracteres',
+    pwMax: 'La contraseña debe tener 64 caracteres o menos',
+    pwUpper: 'La contraseña debe contener al menos una letra mayúscula',
+    pwLower: 'La contraseña debe contener al menos una letra minúscula',
+    pwNumber: 'La contraseña debe contener al menos un número',
+    pwSpecial: 'La contraseña debe contener al menos un carácter especial',
+  },
+}
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
 
+/* Validation messages are keys so they can be resolved in the active language. */
 const registerSchema = z.object({
   phone: z
     .string()
-    .min(1, 'Phone number is required')
-    .refine((v) => isValidPhoneNumber(v || ''), 'Enter a valid phone number'),
+    .min(1, 'phoneRequired')
+    .refine((v) => isValidPhoneNumber(v || ''), 'phoneInvalid'),
   username: z
     .string()
     .trim()
-    .min(1, 'Username is required')
-    .max(50, 'Username must be 50 characters or fewer'),
+    .min(1, 'usernameRequired')
+    .max(50, 'usernameMax'),
   date_of_birth: z
     .string()
-    .min(1, 'Date of birth is required')
-    .regex(ISO_DATE, 'Use the date picker (YYYY-MM-DD)')
+    .min(1, 'dobRequired')
+    .regex(ISO_DATE, 'dobFormat')
     .refine((v) => {
       const d = new Date(v)
       return !Number.isNaN(d.getTime()) && d <= new Date()
-    }, 'Date of birth cannot be in the future')
+    }, 'dobFuture')
     .refine((v) => {
       const d = new Date(v)
       const cutoff = new Date()
       cutoff.setFullYear(cutoff.getFullYear() - 120)
       return d >= cutoff
-    }, 'Date of birth is implausibly old'),
+    }, 'dobOld'),
   password: z
     .string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(64, 'Password must be 64 characters or fewer')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number')
-    .regex(/[!@#$%^&*(),.?":{}|<>]/, 'Password must contain at least one special character'),
+    .min(8, 'pwMin')
+    .max(64, 'pwMax')
+    .regex(/[A-Z]/, 'pwUpper')
+    .regex(/[a-z]/, 'pwLower')
+    .regex(/[0-9]/, 'pwNumber')
+    .regex(/[!@#$%^&*(),.?":{}|<>]/, 'pwSpecial'),
 })
 
 export default function RegisterPage() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
+  const lang = useSelector(selectLang)
   const [register, { isLoading: isRegistering }] = useRegisterMutation()
   const [login] = useLoginMutation()
   const [serverError, setServerError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+
+  const t = COPY[lang]
+  /* Map a schema message key to localized text, falling back to the raw key. */
+  const tError = (key) => t[key] ?? key
 
   const {
     register: registerField,
@@ -101,7 +179,7 @@ export default function RegisterPage() {
           ? detail
           : Array.isArray(detail)
           ? detail.map((d) => d.msg).join(', ')
-          : 'Registration failed. Please try again.'
+          : t.serverError
       )
     }
   }
@@ -118,15 +196,13 @@ export default function RegisterPage() {
 
           <div className="auth-aside-copy">
             <div className="auth-aside-head">
-              <h2 className="auth-aside-title">Get Started with Us</h2>
-              <p className="auth-aside-sub">
-                Complete these easy steps to register your account.
-              </p>
+              <h2 className="auth-aside-title">{t.asideTitle}</h2>
+              <p className="auth-aside-sub">{t.asideSub}</p>
             </div>
 
             <div className="auth-steps">
-              {STEPS.map((title, i) => (
-                <div key={title} className={i === 0 ? 'auth-step is-active' : 'auth-step'}>
+              {t.steps.map((title, i) => (
+                <div key={i} className={i === 0 ? 'auth-step is-active' : 'auth-step'}>
                   <span className="auth-step-num">{i + 1}</span>
                   <p className="auth-step-title">{title}</p>
                 </div>
@@ -137,9 +213,17 @@ export default function RegisterPage() {
 
         {/* RIGHT — the form */}
         <main className="auth-main">
+          <button
+            type="button"
+            className="auth-lang-toggle"
+            onClick={() => dispatch(toggleLanguage())}
+          >
+            {t.switchTo}
+          </button>
+
           <div className="auth-main-head">
-            <h1>Sign up account</h1>
-            <p>Enter your details to create your account.</p>
+            <h1>{t.headTitle}</h1>
+            <p>{t.headSub}</p>
           </div>
 
           {serverError && <div className="auth-server-error">{serverError}</div>}
@@ -147,7 +231,7 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
             <div className="auth-field">
               <label className={errors.phone ? 'auth-label has-error' : 'auth-label'}>
-                Phone number
+                {t.phoneLabel}
               </label>
               <Controller
                 name="phone"
@@ -158,32 +242,32 @@ export default function RegisterPage() {
                     international
                     defaultCountry="MX"
                     countryCallingCodeEditable={false}
-                    placeholder="55 1234 5678"
+                    placeholder={t.phonePlaceholder}
                     className={errors.phone ? 'auth-phone-error' : undefined}
                   />
                 )}
               />
-              {errors.phone && <p className="auth-error">{errors.phone.message}</p>}
+              {errors.phone && <p className="auth-error">{tError(errors.phone.message)}</p>}
             </div>
 
             <div className="auth-field">
               <label className={errors.username ? 'auth-label has-error' : 'auth-label'}>
-                Username
+                {t.usernameLabel}
               </label>
               <input
                 {...registerField('username')}
                 type="text"
                 autoComplete="username"
                 maxLength={50}
-                placeholder="Your name"
+                placeholder={t.usernamePlaceholder}
                 className={errors.username ? 'auth-control has-error' : 'auth-control'}
               />
-              {errors.username && <p className="auth-error">{errors.username.message}</p>}
+              {errors.username && <p className="auth-error">{tError(errors.username.message)}</p>}
             </div>
 
             <div className="auth-field">
               <label className={errors.date_of_birth ? 'auth-label has-error' : 'auth-label'}>
-                Date of birth
+                {t.dobLabel}
               </label>
               <input
                 {...registerField('date_of_birth')}
@@ -192,18 +276,18 @@ export default function RegisterPage() {
                 max={todayIso}
                 className={errors.date_of_birth ? 'auth-control has-error' : 'auth-control'}
               />
-              {errors.date_of_birth && <p className="auth-error">{errors.date_of_birth.message}</p>}
+              {errors.date_of_birth && <p className="auth-error">{tError(errors.date_of_birth.message)}</p>}
             </div>
 
             <div className="auth-field">
               <label className={errors.password ? 'auth-label has-error' : 'auth-label'}>
-                Password
+                {t.passwordLabel}
               </label>
               <input
                 {...registerField('password')}
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="new-password"
-                placeholder="Enter your password"
+                placeholder={t.passwordPlaceholder}
                 className={errors.password ? 'auth-control has-error' : 'auth-control'}
                 style={{ paddingRight: '54px' }}
               />
@@ -211,20 +295,20 @@ export default function RegisterPage() {
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
                 className="auth-pw-toggle"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-label={showPassword ? t.hidePassword : t.showPassword}
               >
-                {showPassword ? 'Hide' : 'Show'}
+                {showPassword ? t.hide : t.show}
               </button>
-              {errors.password && <p className="auth-error">{errors.password.message}</p>}
+              {errors.password && <p className="auth-error">{tError(errors.password.message)}</p>}
             </div>
 
             <button type="submit" disabled={isRegistering} className="auth-submit" style={{ opacity: isRegistering ? 0.7 : 1 }}>
-              {isRegistering ? 'Creating account…' : 'Create account'}
+              {isRegistering ? t.submitting : t.submit}
             </button>
           </form>
 
           <p className="auth-alt">
-            Already have an account? <Link to="/login">Sign in</Link>
+            {t.altPrefix} <Link to="/login">{t.altLink}</Link>
           </p>
         </main>
       </div>
