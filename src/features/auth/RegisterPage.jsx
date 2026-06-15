@@ -1,13 +1,12 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
-import { useRegisterMutation, useLoginMutation } from './authApi'
-import { setCredentials } from './authSlice'
+import { useRegisterMutation } from './authApi'
 import { selectLang, toggleLanguage } from '../i18n/langSlice'
 import './auth.css'
 
@@ -43,6 +42,11 @@ const COPY = {
     altLink: 'Sign in',
     serverError: 'Registration failed. Please try again.',
     switchTo: 'Español',
+    // post-registration success (conversation continues on WhatsApp)
+    successTitle: 'You’re all set!',
+    successBody: 'We’ve sent a WhatsApp message to your phone. Open WhatsApp and reply there to start chatting with Vela.',
+    successHint: 'Didn’t get it? Make sure WhatsApp is installed and message us from the number you registered.',
+    backHome: 'Back to home',
     // validation
     phoneRequired: 'Phone number is required',
     phoneInvalid: 'Enter a valid phone number',
@@ -82,6 +86,11 @@ const COPY = {
     altLink: 'Iniciar sesión',
     serverError: 'El registro falló. Inténtalo de nuevo.',
     switchTo: 'English',
+    // post-registration success (la conversación continúa en WhatsApp)
+    successTitle: '¡Todo listo!',
+    successBody: 'Te enviamos un mensaje de WhatsApp a tu teléfono. Abre WhatsApp y responde ahí para empezar a chatear con Vela.',
+    successHint: '¿No lo recibiste? Asegúrate de tener WhatsApp instalado y escríbenos desde el número con el que te registraste.',
+    backHome: 'Volver al inicio',
     // validation
     phoneRequired: 'El número de teléfono es obligatorio',
     phoneInvalid: 'Ingresa un número de teléfono válido',
@@ -138,13 +147,12 @@ const registerSchema = z.object({
 })
 
 export default function RegisterPage() {
-  const navigate = useNavigate()
   const dispatch = useDispatch()
   const lang = useSelector(selectLang)
   const [register, { isLoading: isRegistering }] = useRegisterMutation()
-  const [login] = useLoginMutation()
   const [serverError, setServerError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
 
   const t = COPY[lang]
   /* Map a schema message key to localized text, falling back to the raw key. */
@@ -167,11 +175,10 @@ export default function RegisterPage() {
     setServerError('')
     try {
       await register(data).unwrap()
-      // /auth/register returns user info but not a usable session token shape;
-      // immediately log in to obtain the bearer token.
-      const tokenResp = await login({ phone: data.phone, password: data.password }).unwrap()
-      dispatch(setCredentials(tokenResp))
-      navigate('/chat')
+      // No web chat anymore: registration triggers a WhatsApp greeting and the
+      // conversation continues on WhatsApp. Show a confirmation instead of
+      // logging the patient into a (now removed) chat UI.
+      setSubmitted(true)
     } catch (err) {
       const detail = err?.data?.detail
       setServerError(
@@ -182,6 +189,60 @@ export default function RegisterPage() {
           : t.serverError
       )
     }
+  }
+
+  // After a successful registration the patient continues on WhatsApp — show
+  // a confirmation panel rather than the form.
+  if (submitted) {
+    return (
+      <div className="auth-page">
+        <div className="auth-shell">
+          <aside className="auth-aside">
+            <Link className="auth-brand" to="/">
+              <VelaMark className="mark" />
+              <span>Vela</span>
+            </Link>
+
+            <div className="auth-aside-copy">
+              <div className="auth-aside-head">
+                <h2 className="auth-aside-title">{t.asideTitle}</h2>
+                <p className="auth-aside-sub">{t.asideSub}</p>
+              </div>
+
+              <div className="auth-steps">
+                {t.steps.map((title, i) => (
+                  <div key={i} className="auth-step is-active">
+                    <span className="auth-step-num">{i + 1}</span>
+                    <p className="auth-step-title">{title}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </aside>
+
+          <main className="auth-main">
+            <button
+              type="button"
+              className="auth-lang-toggle"
+              onClick={() => dispatch(toggleLanguage())}
+            >
+              {t.switchTo}
+            </button>
+
+            <div className="auth-main-head">
+              <h1>{t.successTitle}</h1>
+              <p>{t.successBody}</p>
+            </div>
+
+            <p className="auth-alt" style={{ marginTop: 0 }}>{t.successHint}</p>
+
+            <p className="auth-alt">
+              <Link to="/">{t.backHome}</Link>
+            </p>
+          </main>
+        </div>
+      </div>
+    )
   }
 
   return (

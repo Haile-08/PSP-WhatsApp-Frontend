@@ -107,7 +107,8 @@ export default function LoginPage() {
     try {
       const result = await login(data).unwrap()
       dispatch(setCredentials(result))
-      navigate('/chat')
+      // The web app is admin-only now; ProtectedRoute bounces non-admins.
+      navigate('/admin')
     } catch {
       setServerError(t.serverError)
     }
