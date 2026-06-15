@@ -297,6 +297,18 @@
   background: var(--panel-2);
 }
 .auth-page .PhoneInputCountrySelectArrow { color: var(--tx-2); }
+/* The country picker is a native <select>; dark color-scheme + explicit
+   colors make the expanded option list match the theme instead of the
+   browser's default white background/text. */
+.auth-page .PhoneInputCountrySelect {
+  color-scheme: dark;
+  color: var(--tx);
+  background: var(--panel-2);
+}
+.auth-page .PhoneInputCountrySelect option {
+  color: var(--tx);
+  background: var(--panel-2);
+}
 .auth-page .PhoneInputInput { padding-left: 14px; }
 .auth-phone-error .PhoneInputInput,
 .auth-phone-error .PhoneInputCountry {
