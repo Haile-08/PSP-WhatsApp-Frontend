@@ -5,6 +5,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import AdminPage from './features/admin/AdminPage'
 import LoginPage from './features/auth/LoginPage'
 import RegisterPage from './features/auth/RegisterPage'
+import ConsentPage from './features/consent/ConsentPage'
 import LandingPage from './features/landing/LandingPage'
 
 // The patient-facing chat UI has been retired — all conversations happen on
@@ -19,6 +20,7 @@ export default function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/consent" element={<ConsentPage />} />
           <Route
             path="/admin"
             element={

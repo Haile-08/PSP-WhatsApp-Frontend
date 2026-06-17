@@ -21,7 +21,8 @@ export const authApi = createApi({
       },
     }),
     register: builder.mutation({
-      // body: { phone, username, password, date_of_birth: 'YYYY-MM-DD' }
+      // body: { first_name, last_name, phone, email,
+      //         date_of_birth: 'YYYY-MM-DD', communication_preference }
       query: (body) => ({
         url: '/auth/register',
         method: 'POST',

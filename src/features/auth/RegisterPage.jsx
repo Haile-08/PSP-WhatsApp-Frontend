@@ -25,43 +25,45 @@ const COPY = {
     steps: ['Sign up your account', 'Verify your number', 'Start chatting with Vela'],
     headTitle: 'Sign up account',
     headSub: 'Enter your details to create your account.',
+    sectionPersonal: 'Personal information',
+    firstNameLabel: 'First name',
+    firstNamePlaceholder: 'Jane',
+    lastNameLabel: 'Last name',
+    lastNamePlaceholder: 'Doe',
     phoneLabel: 'Phone number',
     phonePlaceholder: '55 1234 5678',
-    usernameLabel: 'Username',
-    usernamePlaceholder: 'Your name',
+    emailLabel: 'Email',
+    emailPlaceholder: 'you@example.com',
     dobLabel: 'Date of birth',
-    passwordLabel: 'Password',
-    passwordPlaceholder: 'Enter your password',
-    show: 'Show',
-    hide: 'Hide',
-    showPassword: 'Show password',
-    hidePassword: 'Hide password',
+    commPrefLabel: 'How should we contact you?',
+    commWhatsapp: 'WhatsApp',
+    commEmail: 'Email',
     submit: 'Create account',
     submitting: 'Creating account…',
     altPrefix: 'Already have an account?',
     altLink: 'Sign in',
     serverError: 'Registration failed. Please try again.',
     switchTo: 'Español',
-    // post-registration success (conversation continues on WhatsApp)
+    // post-registration success (conversation continues on the chosen channel)
     successTitle: 'You’re all set!',
     successBody: 'We’ve sent a WhatsApp message to your phone. Open WhatsApp and reply there to start chatting with Vela.',
     successHint: 'Didn’t get it? Make sure WhatsApp is installed and message us from the number you registered.',
+    successBodyEmail: 'We’ve sent you an email. Open your inbox and reply there to start chatting with Vela.',
+    successHintEmail: 'Didn’t get it? Check your spam folder and make sure you used the right email address.',
     backHome: 'Back to home',
     // validation
     phoneRequired: 'Phone number is required',
     phoneInvalid: 'Enter a valid phone number',
-    usernameRequired: 'Username is required',
-    usernameMax: 'Username must be 50 characters or fewer',
+    firstNameRequired: 'First name is required',
+    lastNameRequired: 'Last name is required',
+    nameMax: 'Must be 50 characters or fewer',
+    emailRequired: 'Email is required',
+    emailInvalid: 'Enter a valid email address',
     dobRequired: 'Date of birth is required',
     dobFormat: 'Use the date picker (YYYY-MM-DD)',
     dobFuture: 'Date of birth cannot be in the future',
     dobOld: 'Date of birth is implausibly old',
-    pwMin: 'Password must be at least 8 characters',
-    pwMax: 'Password must be 64 characters or fewer',
-    pwUpper: 'Password must contain at least one uppercase letter',
-    pwLower: 'Password must contain at least one lowercase letter',
-    pwNumber: 'Password must contain at least one number',
-    pwSpecial: 'Password must contain at least one special character',
+    commPrefRequired: 'Choose how we should contact you',
   },
   es: {
     asideTitle: 'Comienza con nosotros',
@@ -69,43 +71,45 @@ const COPY = {
     steps: ['Registra tu cuenta', 'Verifica tu número', 'Empieza a chatear con Vela'],
     headTitle: 'Crear cuenta',
     headSub: 'Ingresa tus datos para crear tu cuenta.',
+    sectionPersonal: 'Información personal',
+    firstNameLabel: 'Nombre',
+    firstNamePlaceholder: 'Juana',
+    lastNameLabel: 'Apellido',
+    lastNamePlaceholder: 'Pérez',
     phoneLabel: 'Número de teléfono',
     phonePlaceholder: '55 1234 5678',
-    usernameLabel: 'Nombre de usuario',
-    usernamePlaceholder: 'Tu nombre',
+    emailLabel: 'Correo electrónico',
+    emailPlaceholder: 'tu@ejemplo.com',
     dobLabel: 'Fecha de nacimiento',
-    passwordLabel: 'Contraseña',
-    passwordPlaceholder: 'Ingresa tu contraseña',
-    show: 'Mostrar',
-    hide: 'Ocultar',
-    showPassword: 'Mostrar contraseña',
-    hidePassword: 'Ocultar contraseña',
+    commPrefLabel: '¿Cómo te contactamos?',
+    commWhatsapp: 'WhatsApp',
+    commEmail: 'Correo',
     submit: 'Crear cuenta',
     submitting: 'Creando cuenta…',
     altPrefix: '¿Ya tienes una cuenta?',
     altLink: 'Iniciar sesión',
     serverError: 'El registro falló. Inténtalo de nuevo.',
     switchTo: 'English',
-    // post-registration success (la conversación continúa en WhatsApp)
+    // post-registration success (la conversación continúa en el canal elegido)
     successTitle: '¡Todo listo!',
     successBody: 'Te enviamos un mensaje de WhatsApp a tu teléfono. Abre WhatsApp y responde ahí para empezar a chatear con Vela.',
     successHint: '¿No lo recibiste? Asegúrate de tener WhatsApp instalado y escríbenos desde el número con el que te registraste.',
+    successBodyEmail: 'Te enviamos un correo electrónico. Abre tu bandeja de entrada y responde ahí para empezar a chatear con Vela.',
+    successHintEmail: '¿No lo recibiste? Revisa tu carpeta de spam y asegúrate de haber usado el correo electrónico correcto.',
     backHome: 'Volver al inicio',
     // validation
     phoneRequired: 'El número de teléfono es obligatorio',
     phoneInvalid: 'Ingresa un número de teléfono válido',
-    usernameRequired: 'El nombre de usuario es obligatorio',
-    usernameMax: 'El nombre de usuario debe tener 50 caracteres o menos',
+    firstNameRequired: 'El nombre es obligatorio',
+    lastNameRequired: 'El apellido es obligatorio',
+    nameMax: 'Debe tener 50 caracteres o menos',
+    emailRequired: 'El correo electrónico es obligatorio',
+    emailInvalid: 'Ingresa un correo electrónico válido',
     dobRequired: 'La fecha de nacimiento es obligatoria',
     dobFormat: 'Usa el selector de fecha (AAAA-MM-DD)',
     dobFuture: 'La fecha de nacimiento no puede estar en el futuro',
     dobOld: 'La fecha de nacimiento es inverosímilmente antigua',
-    pwMin: 'La contraseña debe tener al menos 8 caracteres',
-    pwMax: 'La contraseña debe tener 64 caracteres o menos',
-    pwUpper: 'La contraseña debe contener al menos una letra mayúscula',
-    pwLower: 'La contraseña debe contener al menos una letra minúscula',
-    pwNumber: 'La contraseña debe contener al menos un número',
-    pwSpecial: 'La contraseña debe contener al menos un carácter especial',
+    commPrefRequired: 'Elige cómo contactarte',
   },
 }
 
@@ -113,15 +117,24 @@ const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
 
 /* Validation messages are keys so they can be resolved in the active language. */
 const registerSchema = z.object({
+  first_name: z
+    .string()
+    .trim()
+    .min(1, 'firstNameRequired')
+    .max(50, 'nameMax'),
+  last_name: z
+    .string()
+    .trim()
+    .min(1, 'lastNameRequired')
+    .max(50, 'nameMax'),
   phone: z
     .string()
     .min(1, 'phoneRequired')
     .refine((v) => isValidPhoneNumber(v || ''), 'phoneInvalid'),
-  username: z
+  email: z
     .string()
-    .trim()
-    .min(1, 'usernameRequired')
-    .max(50, 'usernameMax'),
+    .min(1, 'emailRequired')
+    .email('emailInvalid'),
   date_of_birth: z
     .string()
     .min(1, 'dobRequired')
@@ -136,14 +149,9 @@ const registerSchema = z.object({
       cutoff.setFullYear(cutoff.getFullYear() - 120)
       return d >= cutoff
     }, 'dobOld'),
-  password: z
-    .string()
-    .min(8, 'pwMin')
-    .max(64, 'pwMax')
-    .regex(/[A-Z]/, 'pwUpper')
-    .regex(/[a-z]/, 'pwLower')
-    .regex(/[0-9]/, 'pwNumber')
-    .regex(/[!@#$%^&*(),.?":{}|<>]/, 'pwSpecial'),
+  communication_preference: z.enum(['whatsapp', 'email'], {
+    errorMap: () => ({ message: 'commPrefRequired' }),
+  }),
 })
 
 export default function RegisterPage() {
@@ -151,8 +159,9 @@ export default function RegisterPage() {
   const lang = useSelector(selectLang)
   const [register, { isLoading: isRegistering }] = useRegisterMutation()
   const [serverError, setServerError] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  // The channel the patient chose, so the success panel can address it.
+  const [submittedChannel, setSubmittedChannel] = useState('whatsapp')
 
   const t = COPY[lang]
   /* Map a schema message key to localized text, falling back to the raw key. */
@@ -165,7 +174,14 @@ export default function RegisterPage() {
     formState: { errors },
   } = useForm({
     resolver: zodResolver(registerSchema),
-    defaultValues: { phone: '', username: '', date_of_birth: '' },
+    defaultValues: {
+      first_name: '',
+      last_name: '',
+      phone: '',
+      email: '',
+      date_of_birth: '',
+      communication_preference: 'whatsapp',
+    },
   })
 
   // Block the native date picker from selecting future dates.
@@ -175,9 +191,10 @@ export default function RegisterPage() {
     setServerError('')
     try {
       await register(data).unwrap()
-      // No web chat anymore: registration triggers a WhatsApp greeting and the
-      // conversation continues on WhatsApp. Show a confirmation instead of
-      // logging the patient into a (now removed) chat UI.
+      // No web chat anymore: registration triggers a greeting on the chosen
+      // channel and the conversation continues there. Show a confirmation
+      // instead of logging the patient into a (now removed) chat UI.
+      setSubmittedChannel(data.communication_preference)
       setSubmitted(true)
     } catch (err) {
       const detail = err?.data?.detail
@@ -194,6 +211,9 @@ export default function RegisterPage() {
   // After a successful registration the patient continues on WhatsApp — show
   // a confirmation panel rather than the form.
   if (submitted) {
+    const isEmail = submittedChannel === 'email'
+    const successBody = isEmail ? t.successBodyEmail : t.successBody
+    const successHint = isEmail ? t.successHintEmail : t.successHint
     return (
       <div className="auth-page">
         <div className="auth-shell">
@@ -231,10 +251,10 @@ export default function RegisterPage() {
 
             <div className="auth-main-head">
               <h1>{t.successTitle}</h1>
-              <p>{t.successBody}</p>
+              <p>{successBody}</p>
             </div>
 
-            <p className="auth-alt" style={{ marginTop: 0 }}>{t.successHint}</p>
+            <p className="auth-alt" style={{ marginTop: 0 }}>{successHint}</p>
 
             <p className="auth-alt">
               <Link to="/">{t.backHome}</Link>
@@ -290,6 +310,43 @@ export default function RegisterPage() {
           {serverError && <div className="auth-server-error">{serverError}</div>}
 
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
+            {/* Personal information — name on its own section, side by side */}
+            <fieldset className="auth-section">
+              <legend className="auth-section-title">{t.sectionPersonal}</legend>
+
+              <div className="auth-row">
+                <div className="auth-field">
+                  <label className={errors.first_name ? 'auth-label has-error' : 'auth-label'}>
+                    {t.firstNameLabel}
+                  </label>
+                  <input
+                    {...registerField('first_name')}
+                    type="text"
+                    autoComplete="given-name"
+                    maxLength={50}
+                    placeholder={t.firstNamePlaceholder}
+                    className={errors.first_name ? 'auth-control has-error' : 'auth-control'}
+                  />
+                  {errors.first_name && <p className="auth-error">{tError(errors.first_name.message)}</p>}
+                </div>
+
+                <div className="auth-field">
+                  <label className={errors.last_name ? 'auth-label has-error' : 'auth-label'}>
+                    {t.lastNameLabel}
+                  </label>
+                  <input
+                    {...registerField('last_name')}
+                    type="text"
+                    autoComplete="family-name"
+                    maxLength={50}
+                    placeholder={t.lastNamePlaceholder}
+                    className={errors.last_name ? 'auth-control has-error' : 'auth-control'}
+                  />
+                  {errors.last_name && <p className="auth-error">{tError(errors.last_name.message)}</p>}
+                </div>
+              </div>
+            </fieldset>
+
             <div className="auth-field">
               <label className={errors.phone ? 'auth-label has-error' : 'auth-label'}>
                 {t.phoneLabel}
@@ -312,18 +369,17 @@ export default function RegisterPage() {
             </div>
 
             <div className="auth-field">
-              <label className={errors.username ? 'auth-label has-error' : 'auth-label'}>
-                {t.usernameLabel}
+              <label className={errors.email ? 'auth-label has-error' : 'auth-label'}>
+                {t.emailLabel}
               </label>
               <input
-                {...registerField('username')}
-                type="text"
-                autoComplete="username"
-                maxLength={50}
-                placeholder={t.usernamePlaceholder}
-                className={errors.username ? 'auth-control has-error' : 'auth-control'}
+                {...registerField('email')}
+                type="email"
+                autoComplete="email"
+                placeholder={t.emailPlaceholder}
+                className={errors.email ? 'auth-control has-error' : 'auth-control'}
               />
-              {errors.username && <p className="auth-error">{tError(errors.username.message)}</p>}
+              {errors.email && <p className="auth-error">{tError(errors.email.message)}</p>}
             </div>
 
             <div className="auth-field">
@@ -341,26 +397,38 @@ export default function RegisterPage() {
             </div>
 
             <div className="auth-field">
-              <label className={errors.password ? 'auth-label has-error' : 'auth-label'}>
-                {t.passwordLabel}
+              <label className={errors.communication_preference ? 'auth-label has-error' : 'auth-label'}>
+                {t.commPrefLabel}
               </label>
-              <input
-                {...registerField('password')}
-                type={showPassword ? 'text' : 'password'}
-                autoComplete="new-password"
-                placeholder={t.passwordPlaceholder}
-                className={errors.password ? 'auth-control has-error' : 'auth-control'}
-                style={{ paddingRight: '54px' }}
+              <Controller
+                name="communication_preference"
+                control={control}
+                render={({ field }) => (
+                  <div className="auth-segmented" role="radiogroup" aria-label={t.commPrefLabel}>
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={field.value === 'whatsapp'}
+                      className={field.value === 'whatsapp' ? 'auth-segment is-active' : 'auth-segment'}
+                      onClick={() => field.onChange('whatsapp')}
+                    >
+                      {t.commWhatsapp}
+                    </button>
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={field.value === 'email'}
+                      className={field.value === 'email' ? 'auth-segment is-active' : 'auth-segment'}
+                      onClick={() => field.onChange('email')}
+                    >
+                      {t.commEmail}
+                    </button>
+                  </div>
+                )}
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword((v) => !v)}
-                className="auth-pw-toggle"
-                aria-label={showPassword ? t.hidePassword : t.showPassword}
-              >
-                {showPassword ? t.hide : t.show}
-              </button>
-              {errors.password && <p className="auth-error">{tError(errors.password.message)}</p>}
+              {errors.communication_preference && (
+                <p className="auth-error">{tError(errors.communication_preference.message)}</p>
+              )}
             </div>
 
             <button type="submit" disabled={isRegistering} className="auth-submit" style={{ opacity: isRegistering ? 0.7 : 1 }}>
