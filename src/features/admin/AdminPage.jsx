@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useDispatch } from 'react-redux'
-import { MoreVertical, AlertTriangle, Search, Phone } from 'lucide-react'
+import { MoreVertical, AlertTriangle, Search, Phone, FileText } from 'lucide-react'
 import Avatar from '../../components/Avatar'
 import DropdownMenu from '../../components/DropdownMenu'
 import MessageBubble from '../chat/MessageBubble'
@@ -25,6 +25,28 @@ const REASON_LABELS = {
 
 function reasonLabel(reason) {
   return REASON_LABELS[reason] || reason
+}
+
+const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/v1`
+
+// The prescription endpoint is admin-only, so a plain <img src> (which can't
+// carry the bearer token) won't work. Fetch it as a blob with the token and
+// open the object URL in a new tab.
+async function openPrescription(userId) {
+  const token = localStorage.getItem('access_token')
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/users/${userId}/prescription`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const blob = await res.blob()
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank', 'noopener,noreferrer')
+    // Revoke after a delay so the new tab has time to load the resource.
+    setTimeout(() => URL.revokeObjectURL(url), 60000)
+  } catch (err) {
+    console.error('Failed to load prescription', err)
+  }
 }
 
 function isSameDay(a, b) {
@@ -290,7 +312,7 @@ function ConversationHeader({ user }) {
       }}
     >
       <Avatar name={user.username} size={40} />
-      <div className="min-w-0">
+      <div className="min-w-0" style={{ flex: 1 }}>
         <div
           className="truncate"
           style={{
@@ -317,6 +339,30 @@ function ConversationHeader({ user }) {
           {user.phone}
         </div>
       </div>
+      {user.has_prescription && (
+        <button
+          type="button"
+          onClick={() => openPrescription(user.id)}
+          title="View the prescription image uploaded at registration"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontSize: '12.5px',
+            fontWeight: 600,
+            color: '#0c0e0d',
+            backgroundColor: '#a3e635',
+            border: 'none',
+            borderRadius: '6px',
+            padding: '6px 12px',
+            cursor: 'pointer',
+            fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
+          }}
+        >
+          <FileText size={14} />
+          Prescription
+        </button>
+      )}
     </div>
   )
 }

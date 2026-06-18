@@ -1,6 +1,7 @@
+import { useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { CheckCheck, Check, Clock } from 'lucide-react'
+import { CheckCheck, Check, Clock, Paperclip } from 'lucide-react'
 
 function BubbleTimestamp({ isoString, status, isOutgoing }) {
   const time = isoString
@@ -100,6 +101,120 @@ function ConsentButtons({ active, onAccept, onRefuse }) {
   )
 }
 
+function directiveButtonStyle(active) {
+  return {
+    flex: 1,
+    padding: '8px 12px',
+    borderRadius: '6px',
+    fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
+    fontSize: '14px',
+    fontWeight: 600,
+    border: '1px solid #2f352f',
+    cursor: active ? 'pointer' : 'not-allowed',
+    opacity: active ? 1 : 0.55,
+    transition: 'background-color 0.15s ease',
+  }
+}
+
+function PhoneConfirmButtons({ active, directive, onSend }) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        gap: '6px',
+        marginTop: '10px',
+        paddingTop: '8px',
+        borderTop: '1px solid rgba(255,255,255,0.08)',
+      }}
+    >
+      <button
+        type="button"
+        disabled={!active}
+        onClick={active ? () => onSend(directive.yes || 'Sí') : undefined}
+        style={{
+          ...directiveButtonStyle(active),
+          backgroundColor: '#a3e635',
+          color: '#0c0e0d',
+          borderColor: '#a3e635',
+        }}
+      >
+        Sí
+      </button>
+      <button
+        type="button"
+        disabled={!active}
+        onClick={active ? () => onSend(directive.no || 'No') : undefined}
+        style={{
+          ...directiveButtonStyle(active),
+          backgroundColor: 'transparent',
+          color: '#c2ccc6',
+        }}
+      >
+        No
+      </button>
+    </div>
+  )
+}
+
+function UploadWidget({ active, directive, onUpload }) {
+  const inputRef = useRef(null)
+  const accept = Array.isArray(directive.accepts) ? directive.accepts.join(',') : 'image/*,application/pdf'
+
+  const handleChange = (e) => {
+    const file = e.target.files && e.target.files[0]
+    if (file && onUpload) onUpload(file)
+    e.target.value = '' // allow re-selecting the same file after a fix
+  }
+
+  return (
+    <div
+      style={{
+        marginTop: '10px',
+        paddingTop: '8px',
+        borderTop: '1px solid rgba(255,255,255,0.08)',
+      }}
+    >
+      <input
+        ref={inputRef}
+        type="file"
+        accept={accept}
+        onChange={handleChange}
+        style={{ display: 'none' }}
+      />
+      <button
+        type="button"
+        disabled={!active}
+        onClick={active ? () => inputRef.current?.click() : undefined}
+        style={{
+          ...directiveButtonStyle(active),
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
+          backgroundColor: '#a3e635',
+          color: '#0c0e0d',
+          borderColor: '#a3e635',
+        }}
+      >
+        <Paperclip size={16} />
+        Subir receta (imagen o PDF)
+      </button>
+    </div>
+  )
+}
+
+function DirectiveControls({ directive, active, onSend, onUpload }) {
+  if (!directive) return null
+  if (directive.type === 'phone_confirm') {
+    return <PhoneConfirmButtons active={active} directive={directive} onSend={onSend} />
+  }
+  if (directive.type === 'upload_request') {
+    return <UploadWidget active={active} directive={directive} onUpload={onUpload} />
+  }
+  return null
+}
+
 export default function MessageBubble({
   message,
   showTail,
@@ -108,6 +223,10 @@ export default function MessageBubble({
   consentActive = false,
   onConsentAccept,
   onConsentRefuse,
+  directive = null,
+  directiveActive = false,
+  onDirectiveSend,
+  onUpload,
 }) {
   const isStreaming = message.status === 'streaming'
   const content = message.content || message.text || ''
@@ -169,6 +288,12 @@ export default function MessageBubble({
                 onRefuse={onConsentRefuse}
               />
             )}
+            <DirectiveControls
+              directive={directive}
+              active={directiveActive}
+              onSend={onDirectiveSend}
+              onUpload={onUpload}
+            />
             <BubbleTimestamp
               isoString={message.created_at || message.timestamp}
               status={message.status}

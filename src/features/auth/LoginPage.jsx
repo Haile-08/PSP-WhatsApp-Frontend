@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
-import { useLoginMutation } from './authApi'
+import { authApi, useLoginMutation } from './authApi'
 import { setCredentials } from './authSlice'
 import { selectLang, toggleLanguage } from '../i18n/langSlice'
 import './auth.css'
@@ -107,8 +107,11 @@ export default function LoginPage() {
     try {
       const result = await login(data).unwrap()
       dispatch(setCredentials(result))
-      // The web app is admin-only now; ProtectedRoute bounces non-admins.
-      navigate('/admin')
+      // Route by role: admins to the operator console, patients to the chat.
+      const me = await dispatch(
+        authApi.endpoints.me.initiate(undefined, { forceRefetch: true })
+      ).unwrap()
+      navigate(me?.role === 'admin' ? '/admin' : '/chat')
     } catch {
       setServerError(t.serverError)
     }
@@ -208,9 +211,10 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* <p className="auth-alt">
-            Don&apos;t have an account? <Link to="/register">Create account</Link>
-          </p> */}
+          <p className="auth-alt">
+            {lang === 'es' ? '¿No tienes una cuenta?' : "Don't have an account?"}{' '}
+            <Link to="/register">{lang === 'es' ? 'Crear cuenta' : 'Create account'}</Link>
+          </p>
         </main>
       </div>
     </div>

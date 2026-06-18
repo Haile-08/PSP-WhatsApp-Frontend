@@ -9,10 +9,8 @@ export default function ChatWindow() {
   const sessionId = conversation?.session_id || null
   const serverMessages = conversation?.messages || []
 
-  const { messages, sendMessage, isStreaming, cancelStream } = useStreamChat(
-    sessionId,
-    serverMessages
-  )
+  const { messages, sendMessage, isStreaming, cancelStream, uploadPrescription } =
+    useStreamChat(sessionId, serverMessages)
 
   return (
     <div className="flex flex-col h-full">
@@ -23,6 +21,7 @@ export default function ChatWindow() {
           sessionId={sessionId}
           serverMessages={messages}
           onSend={sendMessage}
+          onUpload={uploadPrescription}
           isStreaming={isStreaming}
         />
       </div>

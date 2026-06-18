@@ -13,11 +13,11 @@ const API_BASE = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
 /*
  * Patient consent page. The onboarding agent sends a personalized link
- * (over WhatsApp or email) carrying a short-lived access token in the
+ * (over WhatsApp) carrying a short-lived access token in the
  * `token` query param. The patient reviews the program consent here and
  * taps Accept / Decline, which POSTs to /consent authenticated with that
  * token. Accepting advances enrollment to the ID step (the patient then
- * continues on WhatsApp/email); declining ends enrollment.
+ * continues on WhatsApp); declining ends enrollment.
  */
 export default function ConsentPage() {
   const [params] = useSearchParams()

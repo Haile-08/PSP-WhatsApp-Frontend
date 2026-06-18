@@ -21,13 +21,20 @@ export const authApi = createApi({
       },
     }),
     register: builder.mutation({
-      // body: { first_name, last_name, phone, email,
-      //         date_of_birth: 'YYYY-MM-DD', communication_preference }
-      query: (body) => ({
-        url: '/auth/register',
-        method: 'POST',
-        body,
-      }),
+      // Sent as multipart/form-data to match the FastAPI Form() endpoint.
+      // fields: { username, phone, password }
+      query: (fields) => {
+        const form = new FormData()
+        Object.entries(fields).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) form.append(key, value)
+        })
+        // Do NOT set Content-Type — the browser adds the multipart boundary.
+        return {
+          url: '/auth/register',
+          method: 'POST',
+          body: form,
+        }
+      },
     }),
     me: builder.query({
       query: () => '/auth/me',

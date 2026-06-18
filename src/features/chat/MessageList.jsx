@@ -50,7 +50,7 @@ function isConsentMessage(msg, role) {
   return CONSENT_PATTERN.test(text)
 }
 
-export default function MessageList({ sessionId, serverMessages = [], onSend, isStreaming }) {
+export default function MessageList({ sessionId, serverMessages = [], onSend, onUpload, isStreaming }) {
   const streamingMsgs = useSelector(selectStreamingMessages(sessionId))
   const messages = streamingMsgs ?? serverMessages
   const bottomRef = useRef(null)
@@ -67,6 +67,11 @@ export default function MessageList({ sessionId, serverMessages = [], onSend, is
     ? lastMsg.role || (lastMsg.is_user ? 'user' : 'assistant')
     : null
   const activeConsentIdx = isConsentMessage(lastMsg, lastRole) ? lastIdx : -1
+
+  // Onboarding UI directive (phone-confirm buttons / upload widget) is only
+  // interactive on the most recent assistant message and while not streaming.
+  const lastDirective =
+    lastMsg && lastRole === 'assistant' ? lastMsg.directive || null : null
 
   const rendered = []
   let prevDate = null
@@ -85,6 +90,8 @@ export default function MessageList({ sessionId, serverMessages = [], onSend, is
 
     const showTail = role !== prevRole
     const isConsent = isConsentMessage(msg, role)
+    // Only the last assistant message carries an interactive directive.
+    const directive = role === 'assistant' && idx === lastIdx ? lastDirective : null
     rendered.push(
       <MessageBubble
         key={msg.id || `msg-${idx}`}
@@ -95,6 +102,10 @@ export default function MessageList({ sessionId, serverMessages = [], onSend, is
         consentActive={isConsent && idx === activeConsentIdx && !isStreaming}
         onConsentAccept={() => onSend && onSend('Acepto')}
         onConsentRefuse={() => onSend && onSend('Rechazo')}
+        directive={directive}
+        directiveActive={!!directive && !isStreaming}
+        onDirectiveSend={(payload) => onSend && onSend(payload)}
+        onUpload={onUpload}
       />
     )
     prevRole = role
