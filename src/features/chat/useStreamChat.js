@@ -155,15 +155,19 @@ export function useStreamChat(sessionId, serverMessages = []) {
     [sessionId, streaming, serverMessages, dispatch, refreshFromServer]
   )
 
-  // Upload the Phase 1 prescription (image or PDF) to the onboarding endpoint,
+  // Upload an onboarding document to the (step-agnostic) onboarding endpoint,
   // then refresh from the server so the engine's next prompt (or the "what to
-  // fix" message) appears in the thread.
-  const uploadPrescription = useCallback(
-    async (file) => {
+  // fix" message) appears in the thread. ``kind`` only drives the optimistic
+  // bubble text — the server decides what's expected from the patient's
+  // current step (Phase 1 prescription image/PDF or Phase 2 insurance PDF).
+  const uploadDocument = useCallback(
+    async (file, kind = 'prescription') => {
       if (!file || !sessionId) return
       const token = localStorage.getItem('access_token')
       if (!token) return
 
+      const optimisticContent =
+        kind === 'insurance' ? 'Póliza de seguro adjuntada' : 'Receta adjuntada'
       const base = streaming ?? serverMessages
       const userMsgId = makeId()
       const now = new Date().toISOString()
@@ -172,7 +176,7 @@ export function useStreamChat(sessionId, serverMessages = []) {
         {
           id: userMsgId,
           role: 'user',
-          content: 'Receta adjuntada',
+          content: optimisticContent,
           created_at: now,
           status: 'sending',
         },
@@ -211,5 +215,5 @@ export function useStreamChat(sessionId, serverMessages = []) {
 
   const messages = streaming ?? serverMessages
 
-  return { messages, sendMessage, isStreaming, cancelStream, uploadPrescription }
+  return { messages, sendMessage, isStreaming, cancelStream, uploadDocument }
 }

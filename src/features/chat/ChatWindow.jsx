@@ -9,7 +9,7 @@ export default function ChatWindow() {
   const sessionId = conversation?.session_id || null
   const serverMessages = conversation?.messages || []
 
-  const { messages, sendMessage, isStreaming, cancelStream, uploadPrescription } =
+  const { messages, sendMessage, isStreaming, cancelStream, uploadDocument } =
     useStreamChat(sessionId, serverMessages)
 
   return (
@@ -21,7 +21,7 @@ export default function ChatWindow() {
           sessionId={sessionId}
           serverMessages={messages}
           onSend={sendMessage}
-          onUpload={uploadPrescription}
+          onUpload={uploadDocument}
           isStreaming={isStreaming}
         />
       </div>

@@ -10,12 +10,20 @@ const DETAIL_POLL_MS = 4000
 export const adminApi = createApi({
   reducerPath: 'adminApi',
   baseQuery,
-  tagTypes: ['AdminUsers', 'AdminConversation', 'AdminEscalations'],
+  tagTypes: ['AdminUsers', 'AdminConversation', 'AdminEscalations', 'AdminProfile'],
   endpoints: (builder) => ({
     adminUsers: builder.query({
       query: () => '/admin/users',
       providesTags: ['AdminUsers'],
       pollingInterval: USERS_POLL_MS,
+    }),
+    adminUserProfile: builder.query({
+      query: (userId) => `/admin/users/${userId}/profile`,
+      providesTags: (_r, _e, userId) => [{ type: 'AdminProfile', id: userId }],
+      // The patient keeps filling in onboarding fields over WhatsApp while the
+      // operator watches, so refresh the profile on the same live cadence as
+      // the conversation feed.
+      pollingInterval: DETAIL_POLL_MS,
     }),
     adminUserConversation: builder.query({
       query: (userId) => `/admin/users/${userId}/conversation`,
@@ -52,6 +60,7 @@ export const adminApi = createApi({
 
 export const {
   useAdminUsersQuery,
+  useAdminUserProfileQuery,
   useAdminUserConversationQuery,
   useAdminUserEscalationsQuery,
   useSendAdminMessageMutation,

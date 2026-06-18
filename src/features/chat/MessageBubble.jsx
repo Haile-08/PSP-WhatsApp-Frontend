@@ -156,13 +156,13 @@ function PhoneConfirmButtons({ active, directive, onSend }) {
   )
 }
 
-function UploadWidget({ active, directive, onUpload }) {
+function UploadWidget({ active, directive, onUpload, kind = 'prescription', buttonText }) {
   const inputRef = useRef(null)
   const accept = Array.isArray(directive.accepts) ? directive.accepts.join(',') : 'image/*,application/pdf'
 
   const handleChange = (e) => {
     const file = e.target.files && e.target.files[0]
-    if (file && onUpload) onUpload(file)
+    if (file && onUpload) onUpload(file, kind)
     e.target.value = '' // allow re-selecting the same file after a fix
   }
 
@@ -198,7 +198,7 @@ function UploadWidget({ active, directive, onUpload }) {
         }}
       >
         <Paperclip size={16} />
-        Subir receta (imagen o PDF)
+        {buttonText}
       </button>
     </div>
   )
@@ -206,11 +206,32 @@ function UploadWidget({ active, directive, onUpload }) {
 
 function DirectiveControls({ directive, active, onSend, onUpload }) {
   if (!directive) return null
-  if (directive.type === 'phone_confirm') {
+  if (directive.type === 'phone_confirm' || directive.type === 'yesno_select') {
+    // Both render a Sí / No pair driven by directive.yes / directive.no; the
+    // Phase 3 clinical yes/no questions reuse the same control as phone-confirm.
     return <PhoneConfirmButtons active={active} directive={directive} onSend={onSend} />
   }
   if (directive.type === 'upload_request') {
-    return <UploadWidget active={active} directive={directive} onUpload={onUpload} />
+    return (
+      <UploadWidget
+        active={active}
+        directive={directive}
+        onUpload={onUpload}
+        kind="prescription"
+        buttonText="Subir receta (imagen o PDF)"
+      />
+    )
+  }
+  if (directive.type === 'insurance_upload') {
+    return (
+      <UploadWidget
+        active={active}
+        directive={directive}
+        onUpload={onUpload}
+        kind="insurance"
+        buttonText="Subir póliza de seguro (PDF)"
+      />
+    )
   }
   return null
 }

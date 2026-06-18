@@ -1,6 +1,27 @@
 import { useMemo, useState } from 'react'
 import { useDispatch } from 'react-redux'
-import { MoreVertical, AlertTriangle, Search, Phone, FileText } from 'lucide-react'
+import {
+  MoreVertical,
+  AlertTriangle,
+  Search,
+  Phone,
+  FileText,
+  User as UserIcon,
+  Mail,
+  Calendar,
+  Venus,
+  MapPin,
+  ShieldCheck,
+  CreditCard,
+  CheckCircle2,
+  Clock,
+  CircleDashed,
+  ExternalLink,
+  Stethoscope,
+  Syringe,
+  Pill,
+  Activity,
+} from 'lucide-react'
 import Avatar from '../../components/Avatar'
 import DropdownMenu from '../../components/DropdownMenu'
 import MessageBubble from '../chat/MessageBubble'
@@ -9,10 +30,9 @@ import ChatInput from '../chat/ChatInput'
 import { logout } from '../auth/authSlice'
 import {
   useAdminUsersQuery,
+  useAdminUserProfileQuery,
   useAdminUserConversationQuery,
-  useAdminUserEscalationsQuery,
   useSendAdminMessageMutation,
-  useResolveEscalationMutation,
 } from './adminApi'
 
 // Reason codes mirror app/models/escalation.py — we render friendly
@@ -29,13 +49,14 @@ function reasonLabel(reason) {
 
 const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/v1`
 
-// The prescription endpoint is admin-only, so a plain <img src> (which can't
-// carry the bearer token) won't work. Fetch it as a blob with the token and
-// open the object URL in a new tab.
-async function openPrescription(userId) {
+// The document endpoints are admin-only, so a plain <img src> / <a href>
+// (which can't carry the bearer token) won't work. Fetch the file as a blob
+// with the token and open the object URL in a new tab. ``path`` is the admin
+// route segment, e.g. ``prescription`` or ``insurance-policy``.
+async function openDocument(userId, path) {
   const token = localStorage.getItem('access_token')
   try {
-    const res = await fetch(`${API_BASE_URL}/admin/users/${userId}/prescription`, {
+    const res = await fetch(`${API_BASE_URL}/admin/users/${userId}/${path}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -45,8 +66,58 @@ async function openPrescription(userId) {
     // Revoke after a delay so the new tab has time to load the resource.
     setTimeout(() => URL.revokeObjectURL(url), 60000)
   } catch (err) {
-    console.error('Failed to load prescription', err)
+    console.error('Failed to load document', err)
   }
+}
+
+// Coarse 1..8 onboarding journey, surfaced as friendly labels in the profile
+// pane header. Mirrors the phase constants in
+// app/core/langgraph/agents/onboarding/phases.py.
+const PHASE_LABELS = {
+  1: 'Registration',
+  2: 'Pre-Verification',
+  3: 'Clinical Information',
+  4: 'Consent',
+  5: 'Scheduling',
+  6: 'Broker & Shipment',
+  7: 'Claim Follow-up',
+  8: 'Additional Benefits',
+}
+
+// Canonical gender tokens persisted by the Phase 2 engine → display label.
+const GENDER_LABELS = {
+  femenino: 'Female',
+  masculino: 'Male',
+  otro: 'Other',
+  no_especifica: 'Prefers not to say',
+}
+
+function genderLabel(g) {
+  if (!g) return null
+  return GENDER_LABELS[g] || g
+}
+
+// Render a tri-state boolean clinical answer: null/undefined stays "not
+// captured" (handled by ProfileField), true → "Yes", false → "No".
+function yesNoLabel(value) {
+  if (value === null || value === undefined) return null
+  return value ? 'Yes' : 'No'
+}
+
+function formatDob(iso) {
+  if (!iso) return null
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return iso
+  return d.toLocaleDateString([], { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
+// Compare a section's phase against the patient's current onboarding_phase to
+// drive the status pill: a phase fully behind the cursor is complete, the
+// phase the cursor sits on is in progress, and anything ahead is pending.
+function phaseStatus(currentPhase, sectionPhase) {
+  if (currentPhase > sectionPhase) return 'complete'
+  if (currentPhase === sectionPhase) return 'active'
+  return 'pending'
 }
 
 function isSameDay(a, b) {
@@ -108,7 +179,7 @@ function AdminHeader() {
               lineHeight: '18px',
             }}
           >
-            Escalations from the agent land here
+            Patient onboarding & document review
           </div>
         </div>
       </div>
@@ -342,7 +413,7 @@ function ConversationHeader({ user }) {
       {user.has_prescription && (
         <button
           type="button"
-          onClick={() => openPrescription(user.id)}
+          onClick={() => openDocument(user.id, 'prescription')}
           title="View the prescription image uploaded at registration"
           style={{
             display: 'flex',
@@ -433,119 +504,254 @@ function ConversationPane({ user }) {
   )
 }
 
-function EscalationCard({ escalation }) {
-  const resolved = !!escalation.resolved_at
-  const [resolveEscalation, { isLoading: isResolving }] = useResolveEscalationMutation()
+// --- Patient profile pane (Phase 1 + Phase 2 onboarding) -----------------
 
-  const handleResolve = async () => {
-    try {
-      await resolveEscalation(escalation.id).unwrap()
-    } catch (err) {
-      // RTK Query will surface the failure via the mutation state; nothing
-      // user-facing to do beyond logging.
-      console.error('Failed to resolve escalation', err)
-    }
-  }
+const STATUS_META = {
+  complete: { label: 'Complete', color: '#a3e635', Icon: CheckCircle2 },
+  active: { label: 'In progress', color: '#fbbf24', Icon: Clock },
+  pending: { label: 'Pending', color: '#8a958f', Icon: CircleDashed },
+}
 
+function StatusPill({ status }) {
+  const meta = STATUS_META[status] || STATUS_META.pending
+  const { Icon } = meta
   return (
-    <div
+    <span
       style={{
-        backgroundColor: '#1b1e1b',
-        borderRadius: '8px',
-        padding: '12px 14px',
-        marginBottom: '10px',
-        border: '1px solid #262b27',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.35)',
-        borderLeft: `4px solid ${resolved ? '#a3e635' : '#f87171'}`,
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '5px',
+        fontSize: '11px',
+        fontWeight: 600,
+        color: meta.color,
+        backgroundColor: `${meta.color}1a`,
+        border: `1px solid ${meta.color}40`,
+        borderRadius: '999px',
+        padding: '3px 9px',
+        textTransform: 'uppercase',
+        letterSpacing: '0.4px',
+        whiteSpace: 'nowrap',
       }}
     >
-      <div className="flex items-center justify-between" style={{ marginBottom: '4px' }}>
-        <span
-          style={{
-            fontSize: '13.5px',
-            fontWeight: 600,
-            color: '#e9edec',
-            fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
-          }}
-        >
-          {reasonLabel(escalation.reason)}
-        </span>
-        <span
-          style={{
-            fontSize: '11px',
-            color: resolved ? '#a3e635' : '#f87171',
-            fontWeight: 600,
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px',
-          }}
-        >
-          {resolved ? 'Resolved' : 'Open'}
-        </span>
-      </div>
-      <div
-        style={{
-          fontSize: '12px',
-          color: '#8a958f',
-          fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
-          marginBottom: '6px',
-        }}
-      >
-        Stage: {escalation.stage} · {formatRelativeTime(escalation.created_at)}
-      </div>
-      {escalation.detail && (
+      <Icon size={12} />
+      {meta.label}
+    </span>
+  )
+}
+
+// A single labelled datum. Falls back to a muted "Not captured yet" so the
+// operator can tell an empty field from a captured one at a glance.
+function ProfileField(props) {
+  // Destructure in the body (not the param list) so the JSX-only ``Icon``
+  // binding is matched by the uppercase varsIgnorePattern — this project's
+  // ESLint config has no react/jsx-uses-vars rule.
+  const { icon: Icon, label, value } = props
+  const has = value !== null && value !== undefined && value !== ''
+  return (
+    <div className="flex items-start" style={{ gap: '10px', padding: '7px 0' }}>
+      <Icon size={15} color="#6f7a74" style={{ marginTop: '2px', flexShrink: 0 }} />
+      <div style={{ minWidth: 0, flex: 1 }}>
         <div
           style={{
-            fontSize: '13px',
-            color: '#c2ccc6',
+            fontSize: '11px',
+            color: '#8a958f',
+            textTransform: 'uppercase',
+            letterSpacing: '0.4px',
             fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
-            backgroundColor: '#101210',
-            border: '1px solid #262b27',
-            borderRadius: '4px',
-            padding: '6px 8px',
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word',
-            marginBottom: '8px',
           }}
         >
-          {escalation.detail}
+          {label}
         </div>
-      )}
-      {!resolved && escalation.category !== 'guardrail' && (
-        <div className="flex justify-end">
-          <button
-            type="button"
-            onClick={handleResolve}
-            disabled={isResolving}
+        <div
+          style={{
+            fontSize: '14px',
+            color: has ? '#e9edec' : '#5c655f',
+            fontStyle: has ? 'normal' : 'italic',
+            fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
+            wordBreak: 'break-word',
+            marginTop: '1px',
+          }}
+        >
+          {has ? value : 'Not captured yet'}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// A document row with a status dot and, when present, a button that streams
+// the file (auth-only) into a new tab.
+function DocumentRow(props) {
+  const { icon: Icon, label, available, onView } = props
+  return (
+    <div
+      className="flex items-center justify-between"
+      style={{
+        gap: '10px',
+        padding: '9px 11px',
+        marginTop: '8px',
+        backgroundColor: '#101210',
+        border: '1px solid #262b27',
+        borderRadius: '8px',
+      }}
+    >
+      <div className="flex items-center" style={{ gap: '10px', minWidth: 0 }}>
+        <Icon size={16} color={available ? '#a3e635' : '#6f7a74'} style={{ flexShrink: 0 }} />
+        <div style={{ minWidth: 0 }}>
+          <div
+            className="truncate"
             style={{
-              fontSize: '12.5px',
-              fontWeight: 600,
-              color: '#0c0e0d',
-              backgroundColor: isResolving ? '#5c6b4a' : '#a3e635',
-              border: 'none',
-              borderRadius: '6px',
-              padding: '6px 12px',
-              cursor: isResolving ? 'wait' : 'pointer',
+              fontSize: '13.5px',
+              color: '#e9edec',
               fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
             }}
-            title="Mark resolved and send the patient back into onboarding"
           >
-            {isResolving ? 'Resolving…' : 'Resolve'}
-          </button>
+            {label}
+          </div>
+          <div
+            style={{
+              fontSize: '11.5px',
+              color: available ? '#8a958f' : '#5c655f',
+              fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
+            }}
+          >
+            {available ? 'Uploaded' : 'Awaiting upload'}
+          </div>
         </div>
+      </div>
+      {available && (
+        <button
+          type="button"
+          onClick={onView}
+          title={`Open ${label.toLowerCase()} in a new tab`}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: '#0c0e0d',
+            backgroundColor: '#a3e635',
+            border: 'none',
+            borderRadius: '6px',
+            padding: '5px 10px',
+            cursor: 'pointer',
+            flexShrink: 0,
+            fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
+          }}
+        >
+          <ExternalLink size={13} />
+          View
+        </button>
       )}
     </div>
   )
 }
 
-function EscalationsPane({ user }) {
-  const { data: escalations = [], isFetching } = useAdminUserEscalationsQuery(user.id)
-  const openCount = escalations.filter((e) => !e.resolved_at).length
+// A collapsible-looking section wrapping one onboarding phase. Header carries
+// the phase number, name and a status pill computed from the live cursor.
+function SectionCard(props) {
+  const { phase, title, subtitle, icon: Icon, status, children } = props
+  return (
+    <div
+      style={{
+        backgroundColor: '#151815',
+        border: '1px solid #262b27',
+        borderRadius: '12px',
+        overflow: 'hidden',
+        marginBottom: '14px',
+      }}
+    >
+      <div
+        className="flex items-center justify-between"
+        style={{
+          gap: '10px',
+          padding: '13px 15px',
+          borderBottom: '1px solid #262b27',
+          backgroundColor: '#181c18',
+        }}
+      >
+        <div className="flex items-center" style={{ gap: '11px', minWidth: 0 }}>
+          <div
+            className="flex items-center justify-center"
+            style={{
+              width: '34px',
+              height: '34px',
+              borderRadius: '9px',
+              backgroundColor: '#1f261c',
+              border: '1px solid #2c3a26',
+              flexShrink: 0,
+            }}
+          >
+            <Icon size={17} color="#a3e635" />
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: '11px',
+                color: '#8a958f',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
+              }}
+            >
+              Phase {phase}
+            </div>
+            <div
+              className="truncate"
+              style={{
+                fontSize: '15px',
+                fontWeight: 600,
+                color: '#e9edec',
+                fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
+              }}
+            >
+              {title}
+            </div>
+          </div>
+        </div>
+        <StatusPill status={status} />
+      </div>
+      <div style={{ padding: '6px 15px 13px' }}>
+        {subtitle && (
+          <div
+            style={{
+              fontSize: '12px',
+              color: '#8a958f',
+              fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
+              padding: '7px 0 2px',
+            }}
+          >
+            {subtitle}
+          </div>
+        )}
+        {children}
+      </div>
+    </div>
+  )
+}
+
+const INSURANCE_STATUS_LABELS = {
+  pending: 'Pending verification',
+  approved: 'Approved',
+  rejected: 'Rejected',
+  active: 'Active',
+}
+
+function ProfilePane({ user }) {
+  const { data: profile, isFetching } = useAdminUserProfileQuery(user.id)
+  const currentPhase = user.onboarding_phase
+
+  const p1 = profile?.phase1
+  const p2 = profile?.phase2
+  const p3 = profile?.phase3
+  const ins = p2?.insurance
 
   return (
     <div
       className="flex flex-col"
       style={{
-        width: '360px',
+        width: '440px',
         borderLeft: '1px solid #262b27',
         backgroundColor: '#0e100e',
       }}
@@ -565,39 +771,205 @@ function EscalationsPane({ user }) {
         <div
           style={{
             fontSize: '15px',
-            fontWeight: 500,
+            fontWeight: 600,
             color: '#e9edec',
             fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
           }}
         >
-          Escalations
+          Patient Profile
         </div>
         <div
           style={{
             fontSize: '12.5px',
-            color: openCount > 0 ? '#f87171' : '#8a958f',
+            color: '#8a958f',
             fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
           }}
         >
-          {escalations.length === 0
-            ? 'No escalations'
-            : `${openCount} open · ${escalations.length} total`}
+          Onboarding · {PHASE_LABELS[currentPhase] || `Phase ${currentPhase}`}
+          {currentPhase >= 8 ? ' · Complete' : ` · Phase ${currentPhase} of 8`}
         </div>
       </div>
-      <div style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
-        {isFetching && escalations.length === 0 && (
-          <div style={{ color: '#8a958f', fontSize: '13px', textAlign: 'center', padding: '16px 0' }}>
-            Loading…
+
+      <div style={{ flex: 1, overflowY: 'auto', padding: '14px' }}>
+        {isFetching && !profile && (
+          <div style={{ color: '#8a958f', fontSize: '13px', textAlign: 'center', padding: '24px 0' }}>
+            Loading profile…
           </div>
         )}
-        {!isFetching && escalations.length === 0 && (
-          <div style={{ color: '#8a958f', fontSize: '13px', textAlign: 'center', padding: '16px 0' }}>
-            The agent has not escalated for this user.
-          </div>
+
+        {profile && (
+          <>
+            {/* Identity summary */}
+            <div
+              className="flex items-center"
+              style={{
+                gap: '12px',
+                padding: '13px 14px',
+                marginBottom: '14px',
+                backgroundColor: '#151815',
+                border: '1px solid #262b27',
+                borderRadius: '12px',
+              }}
+            >
+              <Avatar name={p1?.full_name || user.username} size={48} />
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div
+                  className="truncate"
+                  style={{
+                    fontSize: '16px',
+                    fontWeight: 600,
+                    color: '#e9edec',
+                    fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
+                  }}
+                >
+                  {p1?.full_name || user.username}
+                </div>
+                <div
+                  className="flex items-center truncate"
+                  style={{
+                    fontSize: '12.5px',
+                    color: '#8a958f',
+                    gap: '5px',
+                    fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
+                  }}
+                >
+                  <Phone size={11} />
+                  {user.phone}
+                </div>
+              </div>
+            </div>
+
+            {/* Phase 1 — Registration */}
+            <SectionCard
+              phase={1}
+              title="Registration"
+              subtitle="Identity & prescription captured at intake."
+              icon={UserIcon}
+              status={phaseStatus(currentPhase, 1)}
+            >
+              <ProfileField icon={UserIcon} label="Full name" value={p1?.full_name} />
+              <ProfileField icon={Mail} label="Email" value={p1?.email} />
+              <ProfileField icon={Phone} label="Contact phone" value={p1?.contact_phone} />
+              <DocumentRow
+                icon={FileText}
+                label="Prescription"
+                available={!!p1?.has_prescription}
+                onView={() => openDocument(user.id, 'prescription')}
+              />
+            </SectionCard>
+
+            {/* Phase 2 — Pre-Verification */}
+            <SectionCard
+              phase={2}
+              title="Pre-Verification"
+              subtitle="Demographics, insurance & delivery address."
+              icon={ShieldCheck}
+              status={phaseStatus(currentPhase, 2)}
+            >
+              <ProfileField icon={Calendar} label="Date of birth" value={formatDob(p2?.date_of_birth)} />
+              <ProfileField icon={Venus} label="Gender" value={genderLabel(p2?.gender)} />
+              <ProfileField icon={MapPin} label="Delivery address" value={p2?.address_line} />
+
+              <div
+                style={{
+                  marginTop: '12px',
+                  paddingTop: '10px',
+                  borderTop: '1px dashed #262b27',
+                }}
+              >
+                <div className="flex items-center justify-between" style={{ gap: '8px' }}>
+                  <span
+                    style={{
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      color: '#c2ccc6',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.4px',
+                      fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
+                    }}
+                  >
+                    Insurance policy
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '11.5px',
+                      fontWeight: 600,
+                      color: p2?.insurance_status === 'pending' ? '#fbbf24' : '#a3e635',
+                    }}
+                  >
+                    {INSURANCE_STATUS_LABELS[p2?.insurance_status] || p2?.insurance_status}
+                  </span>
+                </div>
+                <ProfileField icon={ShieldCheck} label="Insurer" value={ins?.insurer} />
+                <ProfileField icon={CreditCard} label="Policy number" value={ins?.policy_number} />
+                <ProfileField icon={UserIcon} label="Policy holder" value={ins?.holder_name} />
+                <ProfileField
+                  icon={Calendar}
+                  label="Validity"
+                  value={
+                    ins?.valid_from || ins?.valid_to
+                      ? `${ins?.valid_from || '—'} → ${ins?.valid_to || '—'}`
+                      : null
+                  }
+                />
+                <ProfileField icon={CreditCard} label="Sum insured" value={ins?.sum_insured} />
+                <DocumentRow
+                  icon={FileText}
+                  label="Insurance policy (PDF)"
+                  available={!!p2?.has_insurance_policy}
+                  onView={() => openDocument(user.id, 'insurance-policy')}
+                />
+              </div>
+            </SectionCard>
+
+            {/* Phase 3 — Clinical Information */}
+            <SectionCard
+              phase={3}
+              title="Clinical Information"
+              subtitle="Biological treatment history & diagnosis (health data)."
+              icon={Stethoscope}
+              status={phaseStatus(currentPhase, 3)}
+            >
+              <ProfileField
+                icon={Syringe}
+                label="First biological medicine"
+                value={yesNoLabel(p3?.is_first_biologic)}
+              />
+              <ProfileField
+                icon={Pill}
+                label="Switching from another biological"
+                value={yesNoLabel(p3?.is_switching_biologic)}
+              />
+              {p3?.is_switching_biologic && (
+                <ProfileField
+                  icon={Pill}
+                  label="Previous biological"
+                  value={p3?.previous_biologic_name}
+                />
+              )}
+              <ProfileField
+                icon={Activity}
+                label="On steroid treatment"
+                value={yesNoLabel(p3?.on_steroid_treatment)}
+              />
+              <ProfileField
+                icon={Calendar}
+                label="Year of initial diagnosis"
+                value={p3?.diagnosis_year ? String(p3.diagnosis_year) : null}
+              />
+              <ProfileField
+                icon={Clock}
+                label="Years in treatment with physician"
+                value={
+                  p3?.treatment_years_with_physician !== null &&
+                  p3?.treatment_years_with_physician !== undefined
+                    ? String(p3.treatment_years_with_physician)
+                    : null
+                }
+              />
+            </SectionCard>
+          </>
         )}
-        {escalations.map((e) => (
-          <EscalationCard key={e.id} escalation={e} />
-        ))}
       </div>
     </div>
   )
@@ -620,8 +992,8 @@ function EmptyState() {
         Select a user to view their conversation
       </div>
       <div style={{ fontSize: '13px', color: '#8a958f', maxWidth: '360px', textAlign: 'center' }}>
-        When the agent escalates a turn it lands here. Pick a contact on the left
-        to see the full chat and every escalation logged for that user.
+        Pick a contact on the left to see their full conversation alongside the
+        full onboarding profile and uploaded documents.
       </div>
     </div>
   )
@@ -660,7 +1032,7 @@ export default function AdminPage() {
       {selectedUser ? (
         <>
           <ConversationPane user={selectedUser} />
-          <EscalationsPane user={selectedUser} />
+          <ProfilePane user={selectedUser} />
         </>
       ) : (
         <EmptyState />
