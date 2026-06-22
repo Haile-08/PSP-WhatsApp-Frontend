@@ -246,6 +246,19 @@
   border: 1px solid color-mix(in oklab, var(--danger) 42%, transparent);
 }
 
+/* Shown on the post-registration / patient-login confirmation screen, where
+   the conversation continues over WhatsApp instead of a web chat. */
+.auth-success-note {
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  text-align: center;
+  color: var(--tx-2);
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+}
+
 .auth-field { position: relative; }
 .auth-field + .auth-field { margin-top: 18px; }
 

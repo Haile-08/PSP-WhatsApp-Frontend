@@ -1,17 +1,13 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit'
 import { adminApi } from '../features/admin/adminApi'
 import { authApi } from '../features/auth/authApi'
-import { messagesApi } from '../features/chat/messagesApi'
 import authReducer from '../features/auth/authSlice'
-import chatReducer from '../features/chat/chatSlice'
 import langReducer from '../features/i18n/langSlice'
 
 const appReducer = combineReducers({
   auth: authReducer,
-  chat: chatReducer,
   lang: langReducer,
   [authApi.reducerPath]: authApi.reducer,
-  [messagesApi.reducerPath]: messagesApi.reducer,
   [adminApi.reducerPath]: adminApi.reducer,
 })
 
@@ -31,6 +27,5 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
       .concat(authApi.middleware)
-      .concat(messagesApi.middleware)
       .concat(adminApi.middleware),
 })

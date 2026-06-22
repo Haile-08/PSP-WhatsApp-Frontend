@@ -1,13 +1,12 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
-import { useRegisterMutation, useLoginMutation } from './authApi'
-import { setCredentials } from './authSlice'
+import { useRegisterMutation } from './authApi'
 import { selectLang, toggleLanguage } from '../i18n/langSlice'
 import './auth.css'
 
@@ -29,7 +28,7 @@ const COPY = {
   en: {
     asideTitle: 'Get Started with Us',
     asideSub: 'Complete these easy steps to register your account.',
-    steps: ['Sign up your account', 'Verify your number', 'Start chatting with Vela'],
+    steps: ['Sign up your account', 'Verify your number', 'Continue on WhatsApp'],
     headTitle: 'Sign up account',
     headSub: 'Enter your details to create your account.',
     usernameLabel: 'Username',
@@ -48,6 +47,12 @@ const COPY = {
     altLink: 'Sign in',
     serverError: 'Registration failed. Please try again.',
     switchTo: 'Español',
+    // success screen (shown after registering — enrollment continues on WhatsApp)
+    successTitle: "You're all set!",
+    successBody:
+      "Your account is registered. We'll text you on WhatsApp shortly to finish your enrollment — just reply there to continue.",
+    successNote: 'You can close this page now.',
+    successAltPrefix: 'Need to sign in later?',
     // validation
     passwordRequired: 'Password is required',
     passwordShort: 'Password must be at least 8 characters',
@@ -61,7 +66,7 @@ const COPY = {
   es: {
     asideTitle: 'Comienza con nosotros',
     asideSub: 'Completa estos sencillos pasos para registrar tu cuenta.',
-    steps: ['Registra tu cuenta', 'Verifica tu número', 'Empieza a chatear con Vela'],
+    steps: ['Registra tu cuenta', 'Verifica tu número', 'Continúa por WhatsApp'],
     headTitle: 'Crear cuenta',
     headSub: 'Ingresa tus datos para crear tu cuenta.',
     usernameLabel: 'Nombre de usuario',
@@ -80,6 +85,12 @@ const COPY = {
     altLink: 'Iniciar sesión',
     serverError: 'El registro falló. Inténtalo de nuevo.',
     switchTo: 'English',
+    // pantalla de éxito (la inscripción continúa por WhatsApp)
+    successTitle: '¡Listo!',
+    successBody:
+      'Tu cuenta está registrada. Te escribiremos por WhatsApp en breve para completar tu inscripción; responde ahí para continuar.',
+    successNote: 'Ya puedes cerrar esta página.',
+    successAltPrefix: '¿Necesitas iniciar sesión más tarde?',
     // validation
     passwordRequired: 'La contraseña es obligatoria',
     passwordShort: 'La contraseña debe tener al menos 8 caracteres',
@@ -113,12 +124,13 @@ const registerSchema = z.object({
 
 export default function RegisterPage() {
   const dispatch = useDispatch()
-  const navigate = useNavigate()
   const lang = useSelector(selectLang)
   const [register, { isLoading: isRegistering }] = useRegisterMutation()
-  const [login, { isLoading: isLoggingIn }] = useLoginMutation()
   const [serverError, setServerError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  // Once registered, we no longer drop the patient into a web chat; the
+  // enrollment continues over WhatsApp, so we just show a confirmation.
+  const [registered, setRegistered] = useState(false)
 
   const t = COPY[lang]
   /* Map a schema message key to localized text, falling back to the raw key. */
@@ -142,12 +154,9 @@ export default function RegisterPage() {
     setServerError('')
     try {
       await register(data).unwrap()
-      // Patients now get a web account: log them straight in and drop them
-      // into the chat (the WhatsApp greeting still fires server-side, so both
-      // channels stay in sync).
-      const result = await login({ phone: data.phone, password: data.password }).unwrap()
-      dispatch(setCredentials(result))
-      navigate('/chat')
+      // Registration fires the WhatsApp welcome server-side and starts the
+      // enrollment there, so we just confirm here instead of opening a web chat.
+      setRegistered(true)
     } catch (err) {
       const detail = err?.data?.detail
       setServerError(
@@ -177,12 +186,16 @@ export default function RegisterPage() {
             </div>
 
             <div className="auth-steps">
-              {t.steps.map((title, i) => (
-                <div key={i} className={i === 0 ? 'auth-step is-active' : 'auth-step'}>
-                  <span className="auth-step-num">{i + 1}</span>
-                  <p className="auth-step-title">{title}</p>
-                </div>
-              ))}
+              {t.steps.map((title, i) => {
+                // Highlight the WhatsApp step once registered, the first step otherwise.
+                const activeIndex = registered ? t.steps.length - 1 : 0
+                return (
+                  <div key={i} className={i === activeIndex ? 'auth-step is-active' : 'auth-step'}>
+                    <span className="auth-step-num">{i + 1}</span>
+                    <p className="auth-step-title">{title}</p>
+                  </div>
+                )
+              })}
             </div>
           </div>
         </aside>
@@ -197,6 +210,19 @@ export default function RegisterPage() {
             {t.switchTo}
           </button>
 
+          {registered ? (
+            <>
+              <div className="auth-main-head">
+                <h1>{t.successTitle}</h1>
+                <p>{t.successBody}</p>
+              </div>
+              <p className="auth-success-note">{t.successNote}</p>
+              <p className="auth-alt">
+                {t.successAltPrefix} <Link to="/login">{t.altLink}</Link>
+              </p>
+            </>
+          ) : (
+          <>
           <div className="auth-main-head">
             <h1>{t.headTitle}</h1>
             <p>{t.headSub}</p>
@@ -264,14 +290,16 @@ export default function RegisterPage() {
               {errors.password && <p className="auth-error">{tError(errors.password.message)}</p>}
             </div>
 
-            <button type="submit" disabled={isRegistering || isLoggingIn} className="auth-submit" style={{ opacity: isRegistering || isLoggingIn ? 0.7 : 1 }}>
-              {isRegistering || isLoggingIn ? t.submitting : t.submit}
+            <button type="submit" disabled={isRegistering} className="auth-submit" style={{ opacity: isRegistering ? 0.7 : 1 }}>
+              {isRegistering ? t.submitting : t.submit}
             </button>
           </form>
 
           <p className="auth-alt">
             {t.altPrefix} <Link to="/login">{t.altLink}</Link>
           </p>
+          </>
+          )}
         </main>
       </div>
     </div>

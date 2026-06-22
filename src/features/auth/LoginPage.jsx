@@ -7,7 +7,7 @@ import { z } from 'zod'
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
 import { authApi, useLoginMutation } from './authApi'
-import { setCredentials } from './authSlice'
+import { setCredentials, logout } from './authSlice'
 import { selectLang, toggleLanguage } from '../i18n/langSlice'
 import './auth.css'
 
@@ -45,6 +45,11 @@ const COPY = {
     phoneInvalid: 'Enter a valid phone number',
     passwordRequired: 'Password is required',
     switchTo: 'Español',
+    // Patients no longer have a web chat — point them to WhatsApp.
+    patientTitle: 'Continue on WhatsApp',
+    patientBody:
+      "Your conversation with Vela now happens on WhatsApp. Check your messages there to continue — we'll keep texting you.",
+    patientNote: 'You can close this page now.',
   },
   es: {
     asideTitle: 'Bienvenido de nuevo',
@@ -71,6 +76,11 @@ const COPY = {
     phoneInvalid: 'Ingresa un número de teléfono válido',
     passwordRequired: 'La contraseña es obligatoria',
     switchTo: 'English',
+    // Los pacientes ya no tienen chat web; los dirigimos a WhatsApp.
+    patientTitle: 'Continúa por WhatsApp',
+    patientBody:
+      'Tu conversación con Vela ahora es por WhatsApp. Revisa tus mensajes ahí para continuar; seguiremos escribiéndote.',
+    patientNote: 'Ya puedes cerrar esta página.',
   },
 }
 
@@ -89,6 +99,8 @@ export default function LoginPage() {
   const [login, { isLoading }] = useLoginMutation()
   const [serverError, setServerError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  // Patients who sign in are sent back to WhatsApp; only admins reach a page.
+  const [patientNotice, setPatientNotice] = useState(false)
   const lang = useSelector(selectLang)
 
   const t = COPY[lang]
@@ -107,11 +119,17 @@ export default function LoginPage() {
     try {
       const result = await login(data).unwrap()
       dispatch(setCredentials(result))
-      // Route by role: admins to the operator console, patients to the chat.
+      // Route by role: admins reach the operator console; patients no longer
+      // have a web chat, so we clear the session and point them to WhatsApp.
       const me = await dispatch(
         authApi.endpoints.me.initiate(undefined, { forceRefetch: true })
       ).unwrap()
-      navigate(me?.role === 'admin' ? '/admin' : '/chat')
+      if (me?.role === 'admin') {
+        navigate('/admin')
+      } else {
+        dispatch(logout())
+        setPatientNotice(true)
+      }
     } catch {
       setServerError(t.serverError)
     }
@@ -154,6 +172,16 @@ export default function LoginPage() {
             {t.switchTo}
           </button>
 
+          {patientNotice ? (
+            <>
+              <div className="auth-main-head">
+                <h1>{t.patientTitle}</h1>
+                <p>{t.patientBody}</p>
+              </div>
+              <p className="auth-success-note">{t.patientNote}</p>
+            </>
+          ) : (
+          <>
           <div className="auth-main-head">
             <h1>{t.headTitle}</h1>
             <p>{t.headSub}</p>
@@ -215,6 +243,8 @@ export default function LoginPage() {
             {lang === 'es' ? '¿No tienes una cuenta?' : "Don't have an account?"}{' '}
             <Link to="/register">{lang === 'es' ? 'Crear cuenta' : 'Create account'}</Link>
           </p>
+          </>
+          )}
         </main>
       </div>
     </div>
