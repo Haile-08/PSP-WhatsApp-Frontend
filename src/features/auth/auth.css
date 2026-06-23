@@ -259,6 +259,47 @@
   border: 1px solid var(--line);
 }
 
+/* Scannable QR (encodes the same wa.me join link as the button) on the
+   post-registration success screen — for patients registering on desktop. */
+.auth-qr {
+  display: flex;
+  justify-content: center;
+  margin: 6px 0 12px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid var(--line);
+}
+.auth-qr svg {
+  display: block;
+  width: 200px;
+  height: 200px;
+}
+.auth-qr-hint {
+  margin: 0 0 14px;
+  font-size: 13px;
+  text-align: center;
+  color: var(--tx-2);
+}
+/* "or" divider between the QR and the join button. */
+.auth-qr-or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 12px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--tx-2);
+}
+.auth-qr-or::before,
+.auth-qr-or::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
 /* WhatsApp "join the chat" CTA on the post-registration success screen. */
 .auth-whatsapp-btn {
   display: flex;

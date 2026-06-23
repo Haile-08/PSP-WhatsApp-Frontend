@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
+import { QRCodeSVG } from 'qrcode.react'
 import { useRegisterMutation } from './authApi'
 import { selectLang, toggleLanguage } from '../i18n/langSlice'
 import './auth.css'
@@ -59,7 +60,9 @@ const COPY = {
     // success screen (shown after registering — enrollment continues on WhatsApp)
     successTitle: "You're all set!",
     successBody:
-      "Your account is registered. Tap the button below to open WhatsApp and join the chat, then reply there to finish your enrollment.",
+      'Your account is registered. Scan the QR code with your phone, or tap the button below to open WhatsApp and join the chat, then reply there to finish your enrollment.',
+    qrHint: 'Scan with your phone camera to open WhatsApp',
+    qrOr: 'or',
     joinButton: 'Join the chat on WhatsApp',
     successNote: 'You can close this page once you have joined the chat.',
     successAltPrefix: 'Need to sign in later?',
@@ -98,7 +101,9 @@ const COPY = {
     // pantalla de éxito (la inscripción continúa por WhatsApp)
     successTitle: '¡Listo!',
     successBody:
-      'Tu cuenta está registrada. Toca el botón de abajo para abrir WhatsApp y unirte al chat; luego responde ahí para completar tu inscripción.',
+      'Tu cuenta está registrada. Escanea el código QR con tu teléfono, o toca el botón de abajo para abrir WhatsApp y unirte al chat; luego responde ahí para completar tu inscripción.',
+    qrHint: 'Escanea con la cámara de tu teléfono para abrir WhatsApp',
+    qrOr: 'o',
     joinButton: 'Unirse al chat en WhatsApp',
     successNote: 'Puedes cerrar esta página una vez que te hayas unido al chat.',
     successAltPrefix: '¿Necesitas iniciar sesión más tarde?',
@@ -165,8 +170,10 @@ export default function RegisterPage() {
     setServerError('')
     try {
       await register(data).unwrap()
-      // Registration fires the WhatsApp welcome server-side and starts the
-      // enrollment there, so we just confirm here instead of opening a web chat.
+      // The account is created sitting at onboarding step "welcome"; the server
+      // does NOT message the patient yet. Onboarding starts when they join the
+      // Twilio WhatsApp number — via the QR code or button on the success screen
+      // below — and send their first message. So we just confirm here.
       setRegistered(true)
     } catch (err) {
       const detail = err?.data?.detail
@@ -227,6 +234,20 @@ export default function RegisterPage() {
                 <h1>{t.successTitle}</h1>
                 <p>{t.successBody}</p>
               </div>
+              {/* QR encodes the same "join <code>" wa.me link as the button, so a
+                  patient registering on desktop can scan it with their phone, while
+                  mobile users tap the button. */}
+              <div className="auth-qr">
+                <QRCodeSVG
+                  value={WHATSAPP_JOIN_URL}
+                  size={200}
+                  level="M"
+                  marginSize={2}
+                  title={t.joinButton}
+                />
+              </div>
+              <p className="auth-qr-hint">{t.qrHint}</p>
+              <div className="auth-qr-or">{t.qrOr}</div>
               <a
                 className="auth-whatsapp-btn"
                 href={WHATSAPP_JOIN_URL}
