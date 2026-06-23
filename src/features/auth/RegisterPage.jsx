@@ -21,7 +21,7 @@ const USERNAME_PATTERN = /^[A-Za-z0-9._-]+$/
 // sandbox number. Both are overridable via env so prod can point at the real
 // WhatsApp Business number once out of the sandbox.
 const WHATSAPP_SANDBOX_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '14155238886'
-const WHATSAPP_JOIN_CODE = import.meta.env.VITE_WHATSAPP_JOIN_CODE || 'join lonely-pine'
+const WHATSAPP_JOIN_CODE = import.meta.env.VITE_WHATSAPP_JOIN_CODE || 'join imagine-oxygen'
 const WHATSAPP_JOIN_URL = `https://wa.me/${WHATSAPP_SANDBOX_NUMBER}?text=${encodeURIComponent(
   WHATSAPP_JOIN_CODE
 )}`

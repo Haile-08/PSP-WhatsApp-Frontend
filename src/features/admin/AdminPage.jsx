@@ -21,6 +21,8 @@ import {
   Syringe,
   Pill,
   Activity,
+  CalendarCheck,
+  PhoneCall,
 } from 'lucide-react'
 import Avatar from '../../components/Avatar'
 import DropdownMenu from '../../components/DropdownMenu'
@@ -33,6 +35,7 @@ import {
   useAdminUserProfileQuery,
   useAdminUserConversationQuery,
   useSendAdminMessageMutation,
+  useConfirmAppointmentMutation,
 } from './adminApi'
 
 // Reason codes mirror app/models/escalation.py — we render friendly
@@ -745,6 +748,7 @@ function ProfilePane({ user }) {
   const p1 = profile?.phase1
   const p2 = profile?.phase2
   const p3 = profile?.phase3
+  const p5 = profile?.phase5
   const ins = p2?.insurance
 
   return (
@@ -968,10 +972,107 @@ function ProfilePane({ user }) {
                 }
               />
             </SectionCard>
+
+            {/* Phase 5 — Scheduling */}
+            <SchedulingSection userId={user.id} phase5={p5} currentPhase={currentPhase} />
           </>
         )}
       </div>
     </div>
+  )
+}
+
+function formatSlot(iso, timezone) {
+  if (!iso) return null
+  try {
+    return new Date(iso).toLocaleString('es-MX', {
+      weekday: 'long',
+      day: '2-digit',
+      month: 'long',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+      timeZone: timezone || undefined,
+    })
+  } catch {
+    return new Date(iso).toLocaleString()
+  }
+}
+
+function SchedulingSection({ userId, phase5, currentPhase }) {
+  const [confirmAppointment, { isLoading }] = useConfirmAppointmentMutation()
+  const status = phase5?.status
+  const isConfirmed = status === 'confirmed'
+  const canConfirm = phase5?.has_appointment && status === 'booked'
+
+  const handleConfirm = async () => {
+    try {
+      await confirmAppointment(userId).unwrap()
+    } catch {
+      // Surfaced by the disabled state resetting; the operator can retry.
+    }
+  }
+
+  return (
+    <SectionCard
+      phase={5}
+      title="Scheduling"
+      subtitle="Welcome-call appointment with the broker."
+      icon={CalendarCheck}
+      status={phaseStatus(currentPhase, 5)}
+    >
+      {!phase5?.has_appointment && (
+        <ProfileField icon={Clock} label="Appointment" value={null} />
+      )}
+      {phase5?.has_appointment && (
+        <>
+          <ProfileField
+            icon={Calendar}
+            label="Welcome call"
+            value={formatSlot(phase5.slot_start, phase5.timezone)}
+          />
+          <ProfileField
+            icon={CheckCircle2}
+            label="Status"
+            value={isConfirmed ? 'Confirmed' : 'Booked — awaiting call'}
+          />
+          {phase5.broker_notified_at && (
+            <ProfileField
+              icon={Mail}
+              label="Broker notified"
+              value={formatRelativeTime(phase5.broker_notified_at)}
+            />
+          )}
+          {!isConfirmed && (
+            <button
+              type="button"
+              disabled={!canConfirm || isLoading}
+              onClick={handleConfirm}
+              style={{
+                marginTop: '10px',
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                padding: '9px 12px',
+                borderRadius: '8px',
+                fontSize: '13.5px',
+                fontWeight: 600,
+                cursor: canConfirm && !isLoading ? 'pointer' : 'not-allowed',
+                opacity: canConfirm && !isLoading ? 1 : 0.55,
+                backgroundColor: '#a3e635',
+                color: '#0c0e0d',
+                border: '1px solid #a3e635',
+              }}
+            >
+              <PhoneCall size={15} />
+              {isLoading ? 'Confirmando…' : 'Confirmar cita'}
+            </button>
+          )}
+        </>
+      )}
+    </SectionCard>
   )
 }
 

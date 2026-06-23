@@ -204,8 +204,49 @@ function UploadWidget({ active, directive, onUpload, kind = 'prescription', butt
   )
 }
 
+function ListSelect({ active, directive, onSend }) {
+  // Phase 5 date / time pickers: a vertical list of choices. Tapping sends the
+  // option's canonical `value` (ISO date or HH:MM), which the engine validates.
+  const options = Array.isArray(directive.options) ? directive.options : []
+  if (options.length === 0) return null
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '6px',
+        marginTop: '10px',
+        paddingTop: '8px',
+        borderTop: '1px solid rgba(255,255,255,0.08)',
+      }}
+    >
+      {options.map((opt) => (
+        <button
+          key={opt.value}
+          type="button"
+          disabled={!active}
+          onClick={active ? () => onSend(opt.value) : undefined}
+          style={{
+            ...directiveButtonStyle(active),
+            flex: 'none',
+            width: '100%',
+            textAlign: 'left',
+            backgroundColor: 'transparent',
+            color: '#e9edec',
+          }}
+        >
+          {opt.label || opt.value}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 function DirectiveControls({ directive, active, onSend, onUpload }) {
   if (!directive) return null
+  if (directive.type === 'date_select' || directive.type === 'time_select') {
+    return <ListSelect active={active} directive={directive} onSend={onSend} />
+  }
   if (directive.type === 'phone_confirm' || directive.type === 'yesno_select') {
     // Both render a Sí / No pair driven by directive.yes / directive.no; the
     // Phase 3 clinical yes/no questions reuse the same control as phone-confirm.

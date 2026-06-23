@@ -55,6 +55,20 @@ export const adminApi = createApi({
       // open-escalation badge — refresh both.
       invalidatesTags: ['AdminUsers', 'AdminEscalations'],
     }),
+    confirmAppointment: builder.mutation({
+      query: (userId) => ({
+        url: `/admin/users/${userId}/appointment/confirm`,
+        method: 'POST',
+      }),
+      // Confirming the welcome call flips the appointment status, advances the
+      // patient past Phase 5, and messages them — refresh the profile (status +
+      // onboarding phase) and the conversation (the confirmation message).
+      invalidatesTags: (_r, _e, userId) => [
+        { type: 'AdminProfile', id: userId },
+        { type: 'AdminConversation', id: userId },
+        'AdminUsers',
+      ],
+    }),
   }),
 })
 
@@ -65,4 +79,5 @@ export const {
   useAdminUserEscalationsQuery,
   useSendAdminMessageMutation,
   useResolveEscalationMutation,
+  useConfirmAppointmentMutation,
 } = adminApi
