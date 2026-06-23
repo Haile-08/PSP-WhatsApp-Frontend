@@ -26,10 +26,53 @@ const WHATSAPP_JOIN_URL = `https://wa.me/${WHATSAPP_SANDBOX_NUMBER}?text=${encod
   WHATSAPP_JOIN_CODE
 )}`
 
+// Sandbox quirk: the Twilio Sandbox CONSUMES the "join <code>" message to opt the
+// number in and never forwards it to our webhook, so that first message can't
+// start onboarding. A second, ordinary message is what actually reaches the
+// backend and kicks off the flow — hence the two-step success screen below. In
+// production (a real WhatsApp Business number) there is no join step: the join
+// code is just a greeting and a single tap reaches the webhook directly, so the
+// two-step UI collapses to one action. ``VITE_WHATSAPP_START_MESSAGE`` is the
+// text of that second message (default "Hola").
+const WHATSAPP_START_MESSAGE = import.meta.env.VITE_WHATSAPP_START_MESSAGE || 'Hola'
+const WHATSAPP_START_URL = `https://wa.me/${WHATSAPP_SANDBOX_NUMBER}?text=${encodeURIComponent(
+  WHATSAPP_START_MESSAGE
+)}`
+// Treat a "join …" prefilled phrase as sandbox mode (needs the second message);
+// anything else is a production greeting that starts onboarding on its own.
+const IS_SANDBOX = /^join\s/i.test(WHATSAPP_JOIN_CODE)
+
 /* The four-point Vela "sail" mark, shared with the landing. */
 function VelaMark({ className }) {
   return (
     <img src="/icon.svg" className={className} width="34" height="34" alt="" aria-hidden="true" />
+  )
+}
+
+/* WhatsApp glyph used on the join / start buttons. */
+function WhatsAppIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 0 0 1.51 5.26l-.999 3.648 3.978-1.04zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.71.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
+    </svg>
+  )
+}
+
+/* One "open WhatsApp" action: a scannable QR (for desktop registrants) plus the
+   tap-through button (for mobile), both pointing at the same prefilled wa.me URL. */
+function JoinAction({ url, qrTitle, qrHint, orLabel, buttonLabel }) {
+  return (
+    <>
+      <div className="auth-qr">
+        <QRCodeSVG value={url} size={180} level="M" marginSize={2} title={qrTitle} />
+      </div>
+      <p className="auth-qr-hint">{qrHint}</p>
+      <div className="auth-qr-or">{orLabel}</div>
+      <a className="auth-whatsapp-btn" href={url} target="_blank" rel="noopener noreferrer">
+        <WhatsAppIcon />
+        <span>{buttonLabel}</span>
+      </a>
+    </>
   )
 }
 
@@ -60,10 +103,13 @@ const COPY = {
     // success screen (shown after registering — enrollment continues on WhatsApp)
     successTitle: "You're all set!",
     successBody:
-      'Your account is registered. Scan the QR code with your phone, or tap the button below to open WhatsApp and join the chat, then reply there to finish your enrollment.',
+      'Your account is registered. Use the QR code or buttons below to open WhatsApp and start your enrollment.',
     qrHint: 'Scan with your phone camera to open WhatsApp',
     qrOr: 'or',
+    joinStep1: 'Join the WhatsApp sandbox',
+    joinStep2: 'Send a message to start onboarding',
     joinButton: 'Join the chat on WhatsApp',
+    startButton: 'Send "Hola" to begin',
     successNote: 'You can close this page once you have joined the chat.',
     successAltPrefix: 'Need to sign in later?',
     // validation
@@ -101,10 +147,13 @@ const COPY = {
     // pantalla de éxito (la inscripción continúa por WhatsApp)
     successTitle: '¡Listo!',
     successBody:
-      'Tu cuenta está registrada. Escanea el código QR con tu teléfono, o toca el botón de abajo para abrir WhatsApp y unirte al chat; luego responde ahí para completar tu inscripción.',
+      'Tu cuenta está registrada. Usa el código QR o los botones de abajo para abrir WhatsApp e iniciar tu inscripción.',
     qrHint: 'Escanea con la cámara de tu teléfono para abrir WhatsApp',
     qrOr: 'o',
+    joinStep1: 'Únete al sandbox de WhatsApp',
+    joinStep2: 'Envía un mensaje para iniciar la inscripción',
     joinButton: 'Unirse al chat en WhatsApp',
+    startButton: 'Enviar «Hola» para comenzar',
     successNote: 'Puedes cerrar esta página una vez que te hayas unido al chat.',
     successAltPrefix: '¿Necesitas iniciar sesión más tarde?',
     // validation
@@ -234,37 +283,43 @@ export default function RegisterPage() {
                 <h1>{t.successTitle}</h1>
                 <p>{t.successBody}</p>
               </div>
-              {/* QR encodes the same "join <code>" wa.me link as the button, so a
-                  patient registering on desktop can scan it with their phone, while
-                  mobile users tap the button. */}
-              <div className="auth-qr">
-                <QRCodeSVG
-                  value={WHATSAPP_JOIN_URL}
-                  size={200}
-                  level="M"
-                  marginSize={2}
-                  title={t.joinButton}
+              {IS_SANDBOX ? (
+                // Sandbox: two steps, because the "join <code>" message is eaten
+                // by Twilio and a second message is what actually starts onboarding.
+                <>
+                  <div className="auth-join-step-head">
+                    <span className="auth-join-step-num">1</span>
+                    <p>{t.joinStep1}</p>
+                  </div>
+                  <JoinAction
+                    url={WHATSAPP_JOIN_URL}
+                    qrTitle={t.joinButton}
+                    qrHint={t.qrHint}
+                    orLabel={t.qrOr}
+                    buttonLabel={t.joinButton}
+                  />
+                  <div className="auth-join-step-head">
+                    <span className="auth-join-step-num">2</span>
+                    <p>{t.joinStep2}</p>
+                  </div>
+                  <JoinAction
+                    url={WHATSAPP_START_URL}
+                    qrTitle={t.startButton}
+                    qrHint={t.qrHint}
+                    orLabel={t.qrOr}
+                    buttonLabel={t.startButton}
+                  />
+                </>
+              ) : (
+                // Production: one tap reaches the webhook and starts onboarding.
+                <JoinAction
+                  url={WHATSAPP_JOIN_URL}
+                  qrTitle={t.joinButton}
+                  qrHint={t.qrHint}
+                  orLabel={t.qrOr}
+                  buttonLabel={t.joinButton}
                 />
-              </div>
-              <p className="auth-qr-hint">{t.qrHint}</p>
-              <div className="auth-qr-or">{t.qrOr}</div>
-              <a
-                className="auth-whatsapp-btn"
-                href={WHATSAPP_JOIN_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 0 0 1.51 5.26l-.999 3.648 3.978-1.04zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.71.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
-                </svg>
-                <span>{t.joinButton}</span>
-              </a>
+              )}
               <p className="auth-success-note">{t.successNote}</p>
               <p className="auth-alt">
                 {t.successAltPrefix} <Link to="/login">{t.altLink}</Link>

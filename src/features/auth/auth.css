@@ -272,8 +272,30 @@
 }
 .auth-qr svg {
   display: block;
-  width: 200px;
-  height: 200px;
+}
+/* Numbered step heading for the two-step sandbox join flow. */
+.auth-join-step-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--tx);
+}
+.auth-join-step-head p { margin: 0; }
+.auth-join-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #25d366;
+  color: #052e1a;
+  font-size: 13px;
+  font-weight: 700;
 }
 .auth-qr-hint {
   margin: 0 0 14px;
