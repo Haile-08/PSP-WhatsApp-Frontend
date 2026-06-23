@@ -44,7 +44,13 @@
      scrolled into view. (vh kept as a fallback for older engines.) */
   height: 100vh;
   height: 100svh;
-  display: grid;
+  /* Block flow — NOT grid. As a fixed-height grid container, a single child is
+     clamped to the container's row height, so when the shell's content is taller
+     than the viewport (the two-step WhatsApp success screen) it gets capped and
+     `.auth-shell`'s `overflow: hidden` clips the overflow — leaving the second
+     QR/button below the fold with nothing to scroll. In block flow the shell
+     grows with its content and this container scrolls to reach it. */
+  display: block;
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
