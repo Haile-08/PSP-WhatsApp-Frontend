@@ -34,13 +34,16 @@
   top: 0;
   left: 0;
   right: 0;
-  /* Size to the DYNAMIC viewport, not the layout viewport. With `inset: 0` the
-     fixed page is as tall as the toolbar-retracted (large) viewport, so on mobile
-     its bottom — e.g. the second WhatsApp QR step — sits behind the browser chrome
-     and the inner scroll can never reach it. `100dvh` tracks the visible area so
-     the bottom stays reachable. (vh kept as a fallback for older engines.) */
+  /* Size to the SMALL viewport. This page is a `position: fixed` scroll
+     container (the document itself can't scroll — #root is overflow:hidden), and
+     a fixed element sized to 100vh/100dvh can be TALLER than the currently
+     visible area when the mobile browser toolbar is shown, leaving its bottom
+     edge — e.g. the second WhatsApp QR step — behind the chrome where the inner
+     scroll can never reach it. `100svh` is the toolbar-shown height, so the
+     container is never taller than what's on screen and every element can be
+     scrolled into view. (vh kept as a fallback for older engines.) */
   height: 100vh;
-  height: 100dvh;
+  height: 100svh;
   display: grid;
   overflow-x: hidden;
   overflow-y: auto;
@@ -635,9 +638,17 @@
 @media (max-width: 800px) {
   .auth-shell { grid-template-columns: 1fr; }
   .auth-aside { display: none; }
-  /* Keep the tall two-step success screen clear of the home indicator / browser
-     chrome so its last element is fully scrollable into view. */
-  .auth-main { padding-bottom: calc(48px + env(safe-area-inset-bottom, 0px)); }
+  /* On phones, top-align the column (don't vertically center) so the tall
+     two-step success screen always starts at the top and scrolls cleanly down to
+     its last element. This replaces the reliance on `safe center`, which some
+     mobile browsers ignore and fall back to plain centering — pushing the ends
+     of overflowing content out of reach. Extra bottom padding keeps the last
+     element clear of the home indicator / browser chrome. */
+  .auth-main {
+    justify-content: flex-start;
+    padding-top: 36px;
+    padding-bottom: calc(48px + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 @media (max-width: 480px) {
