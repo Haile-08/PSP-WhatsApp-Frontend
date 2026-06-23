@@ -64,7 +64,7 @@ function JoinAction({ url, qrTitle, qrHint, orLabel, buttonLabel }) {
   return (
     <>
       <div className="auth-qr">
-        <QRCodeSVG value={url} size={180} level="M" marginSize={2} title={qrTitle} />
+        <QRCodeSVG value={url} size={150} level="M" marginSize={2} title={qrTitle} />
       </div>
       <p className="auth-qr-hint">{qrHint}</p>
       <div className="auth-qr-or">{orLabel}</div>
