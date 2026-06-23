@@ -259,6 +259,27 @@
   border: 1px solid var(--line);
 }
 
+/* WhatsApp "join the chat" CTA on the post-registration success screen. */
+.auth-whatsapp-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 46px;
+  margin: 4px 0 18px;
+  border-radius: 8px;
+  background: #25d366;
+  color: #052e1a;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  transition: filter 0.2s;
+}
+.auth-whatsapp-btn:hover { filter: brightness(1.06); }
+.auth-whatsapp-btn svg { flex: none; }
+
 .auth-field { position: relative; }
 .auth-field + .auth-field { margin-top: 18px; }
 
