@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import {
   MoreVertical,
@@ -1953,8 +1954,15 @@ function PatientsView() {
 
 export default function AdminPage() {
   // Which workspace the icon rail has selected: the live Dashboard or the
-  // Patients console. Defaults to the Dashboard so admins land on the metrics.
-  const [view, setView] = useState('dashboard')
+  // Patients console. Persisted in the URL (``?view=patients``) so a page
+  // reload keeps the admin on the same workspace instead of snapping back to
+  // the Dashboard. Defaults to the Dashboard when no view is in the URL.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const view = searchParams.get('view') === 'patients' ? 'patients' : 'dashboard'
+  const setView = (next) =>
+    setSearchParams(next === 'patients' ? { view: 'patients' } : {}, {
+      replace: true,
+    })
 
   return (
     <div
