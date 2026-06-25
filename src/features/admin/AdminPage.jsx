@@ -251,7 +251,7 @@ function UserListItem({ user, selected, onClick }) {
         backgroundColor: selected ? '#1e221e' : 'transparent',
         border: 'none',
         borderBottom: '1px solid #1a1d1a',
-        borderLeft: selected ? '3px solid #a3e635' : '3px solid transparent',
+        borderLeft: selected ? '3px solid #5FBA82' : '3px solid transparent',
         cursor: 'pointer',
       }}
       onMouseEnter={(e) => {
@@ -308,7 +308,7 @@ function UserListItem({ user, selected, onClick }) {
                 height: '20px',
                 padding: '0 6px',
                 borderRadius: '10px',
-                backgroundColor: '#a3e635',
+                backgroundColor: '#5FBA82',
                 color: '#0c0e0d',
                 fontSize: '12px',
                 fontWeight: 700,
@@ -378,7 +378,7 @@ function UserList({ users, selectedUserId, onSelect, collapsed, onToggleCollapse
                   width: '100%',
                   padding: '6px 0',
                   border: 'none',
-                  borderLeft: selected ? '3px solid #a3e635' : '3px solid transparent',
+                  borderLeft: selected ? '3px solid #5FBA82' : '3px solid transparent',
                   backgroundColor: selected ? '#1e221e' : 'transparent',
                   cursor: 'pointer',
                 }}
@@ -519,7 +519,7 @@ function ConversationHeader({ user }) {
             fontSize: '12.5px',
             fontWeight: 600,
             color: '#0c0e0d',
-            backgroundColor: '#a3e635',
+            backgroundColor: '#5FBA82',
             border: 'none',
             borderRadius: '6px',
             padding: '6px 12px',
@@ -604,7 +604,7 @@ function ConversationPane({ user }) {
 // --- Patient profile pane (Phase 1 + Phase 2 onboarding) -----------------
 
 const STATUS_META = {
-  complete: { label: 'Complete', color: '#a3e635', Icon: CheckCircle2 },
+  complete: { label: 'Complete', color: '#5FBA82', Icon: CheckCircle2 },
   active: { label: 'In progress', color: '#fbbf24', Icon: Clock },
   pending: { label: 'Pending', color: '#8a958f', Icon: CircleDashed },
 }
@@ -693,7 +693,7 @@ function DocumentRow(props) {
       }}
     >
       <div className="flex items-center" style={{ gap: '10px', minWidth: 0 }}>
-        <Icon size={16} color={available ? '#a3e635' : '#6f7a74'} style={{ flexShrink: 0 }} />
+        <Icon size={16} color={available ? '#5FBA82' : '#6f7a74'} style={{ flexShrink: 0 }} />
         <div style={{ minWidth: 0 }}>
           <div
             className="truncate"
@@ -728,7 +728,7 @@ function DocumentRow(props) {
             fontSize: '12px',
             fontWeight: 600,
             color: '#0c0e0d',
-            backgroundColor: '#a3e635',
+            backgroundColor: '#5FBA82',
             border: 'none',
             borderRadius: '6px',
             padding: '5px 10px',
@@ -780,7 +780,7 @@ function SectionCard(props) {
               flexShrink: 0,
             }}
           >
-            <Icon size={17} color="#a3e635" />
+            <Icon size={17} color="#5FBA82" />
           </div>
           <div style={{ minWidth: 0 }}>
             <div
@@ -837,20 +837,20 @@ const INSURANCE_STATUS_LABELS = {
 
 // Phase 6 — Innovaderm risk band → display meta (drives the verdict banner).
 const RISK_BAND_META = {
-  low: { label: 'Low risk', color: '#a3e635' },
+  low: { label: 'Low risk', color: '#5FBA82' },
   medium: { label: 'Medium risk', color: '#fbbf24' },
   high: { label: 'High risk', color: '#f87171' },
 }
 
 const RECOMMENDATION_META = {
-  recommend: { label: 'Recommended', color: '#a3e635' },
+  recommend: { label: 'Recommended', color: '#5FBA82' },
   review: { label: 'Needs review', color: '#fbbf24' },
   not_recommended: { label: 'Not recommended', color: '#f87171' },
 }
 
 // Colour per scored-factor status in the "why this score" breakdown.
 const FACTOR_STATUS_COLOR = {
-  ok: '#a3e635',
+  ok: '#5FBA82',
   warn: '#fbbf24',
   risk: '#f87171',
   gap: '#9aa5ad',
@@ -918,7 +918,7 @@ function ProfileViewToggle({ view, onChange }) {
               fontSize: '12.5px',
               fontWeight: 600,
               fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
-              backgroundColor: active ? '#a3e635' : 'transparent',
+              backgroundColor: active ? '#5FBA82' : 'transparent',
               color: active ? '#0c0e0d' : '#8a958f',
             }}
           >
@@ -1100,7 +1100,7 @@ function ProfilePane({ user }) {
                     style={{
                       fontSize: '11.5px',
                       fontWeight: 600,
-                      color: p2?.insurance_status === 'pending' ? '#fbbf24' : '#a3e635',
+                      color: p2?.insurance_status === 'pending' ? '#fbbf24' : '#5FBA82',
                     }}
                   >
                     {INSURANCE_STATUS_LABELS[p2?.insurance_status] || p2?.insurance_status}
@@ -1291,9 +1291,9 @@ function SchedulingSection({ userId, phase5, currentPhase }) {
                 fontWeight: 600,
                 cursor: canConfirm && !isLoading ? 'pointer' : 'not-allowed',
                 opacity: canConfirm && !isLoading ? 1 : 0.55,
-                backgroundColor: '#a3e635',
+                backgroundColor: '#5FBA82',
                 color: '#0c0e0d',
-                border: '1px solid #a3e635',
+                border: '1px solid #5FBA82',
               }}
             >
               <PhoneCall size={15} />
@@ -1526,7 +1526,7 @@ function BrokerShipmentSection({ userId, phase6, insurance, currentPhase }) {
             className="flex items-center"
             style={{ gap: '6px', fontSize: '11.5px', color: '#8a958f', marginBottom: '5px' }}
           >
-            <Sparkles size={13} color="#a3e635" />
+            <Sparkles size={13} color="#5FBA82" />
             Asesor note (AI)
           </div>
           <div
@@ -1562,9 +1562,9 @@ function BrokerShipmentSection({ userId, phase6, insurance, currentPhase }) {
                 fontWeight: 600,
                 cursor: busy ? 'not-allowed' : 'pointer',
                 opacity: busy ? 0.55 : 1,
-                backgroundColor: '#a3e635',
+                backgroundColor: '#5FBA82',
                 color: '#0c0e0d',
-                border: '1px solid #a3e635',
+                border: '1px solid #5FBA82',
               }}
             >
               <PackageCheck size={15} />
@@ -1610,7 +1610,7 @@ function BrokerShipmentSection({ userId, phase6, insurance, currentPhase }) {
             }}
           >
             {authorized ? (
-              <CheckCircle2 size={17} color="#a3e635" style={{ flexShrink: 0 }} />
+              <CheckCircle2 size={17} color="#5FBA82" style={{ flexShrink: 0 }} />
             ) : (
               <AlertCircle size={17} color="#f87171" style={{ flexShrink: 0 }} />
             )}
@@ -1768,9 +1768,9 @@ function ClaimFollowUpSection({ userId, phase7, currentPhase }) {
                 fontWeight: 600,
                 cursor: busy ? 'not-allowed' : 'pointer',
                 opacity: busy ? 0.55 : 1,
-                backgroundColor: '#a3e635',
+                backgroundColor: '#5FBA82',
                 color: '#0c0e0d',
-                border: '1px solid #a3e635',
+                border: '1px solid #5FBA82',
               }}
             >
               <BadgeCheck size={15} />
@@ -1816,7 +1816,7 @@ function ClaimFollowUpSection({ userId, phase7, currentPhase }) {
             }}
           >
             {approved ? (
-              <CheckCircle2 size={17} color="#a3e635" style={{ flexShrink: 0 }} />
+              <CheckCircle2 size={17} color="#5FBA82" style={{ flexShrink: 0 }} />
             ) : (
               <AlertCircle size={17} color="#f87171" style={{ flexShrink: 0 }} />
             )}
@@ -1872,7 +1872,7 @@ function BenefitsSection({ phase8, currentPhase }) {
           border: '1px solid #2c3a26',
         }}
       >
-        <Award size={17} color="#a3e635" style={{ flexShrink: 0 }} />
+        <Award size={17} color="#5FBA82" style={{ flexShrink: 0 }} />
         <div style={{ minWidth: 0, flex: 1 }}>
           <div style={{ fontSize: '13.5px', fontWeight: 600, color: '#e9edec' }}>
             Approved · Full benefits unlocked

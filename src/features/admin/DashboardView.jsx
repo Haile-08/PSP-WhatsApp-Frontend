@@ -10,7 +10,7 @@ import {
 import { useAdminStatsQuery } from './adminApi'
 
 const FONT = '"Segoe UI", Helvetica, Arial, sans-serif'
-const ACCENT = '#a3e635'
+const ACCENT = '#5FBA82'
 
 // Phase 1..8 short labels (mirror app/core/.../onboarding/phases.py).
 const PHASE_LABELS = {
@@ -25,7 +25,7 @@ const PHASE_LABELS = {
 }
 
 // Rotating palette for categorical slices (insurance status, etc.).
-const SLICE_COLORS = ['#a3e635', '#38bdf8', '#fbbf24', '#f87171', '#c084fc', '#34d399']
+const SLICE_COLORS = ['#5FBA82', '#38bdf8', '#fbbf24', '#f87171', '#c084fc', '#34d399']
 
 const INSURANCE_LABELS = {
   pending: 'Pending',
@@ -161,7 +161,7 @@ function PhaseBars({ data }) {
                 maxWidth: '34px',
                 height: `${Math.max(h, 3)}px`,
                 borderRadius: '6px 6px 2px 2px',
-                background: `linear-gradient(180deg, ${ACCENT}, #4d7c0f)`,
+                background: `linear-gradient(180deg, ${ACCENT}, #3a8159)`,
               }}
             />
             <span

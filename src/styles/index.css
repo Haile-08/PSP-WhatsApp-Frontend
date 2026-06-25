@@ -67,7 +67,7 @@
 @layer components {
   /* ── App shell with neon strip ── */
   .wa-shell-bg {
-    background: linear-gradient(to bottom, #a3e635 0, #a3e635 127px, #0c0e0d 127px, #0c0e0d 100%);
+    background: linear-gradient(to bottom, #5FBA82 0, #5FBA82 127px, #0c0e0d 127px, #0c0e0d 100%);
   }
 
   /* ── Message bubble tails ── */
@@ -136,7 +136,7 @@
   }
   .icon-btn:hover {
     background-color: rgba(163, 230, 53, 0.12);
-    color: #a3e635;
+    color: #5FBA82;
   }
   .icon-btn:active {
     background-color: rgba(163, 230, 53, 0.22);
@@ -145,7 +145,7 @@
   /* ── Unread badge ── */
   .unread-badge {
     @apply flex items-center justify-center min-w-[20px] h-5 rounded-full text-xs font-semibold px-[6px];
-    background-color: #a3e635;
+    background-color: #5FBA82;
     color: #0c0e0d;
     font-size: 11px;
     line-height: 1;
@@ -173,7 +173,7 @@
   }
   .wa-pill-active {
     background-color: rgba(163, 230, 53, 0.18);
-    color: #c4f06a;
+    color: #86d2a3;
   }
   .wa-pill-active:hover {
     background-color: rgba(163, 230, 53, 0.26);
@@ -190,7 +190,7 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background-color: #a3e635;
+    background-color: #5FBA82;
     animation: wa-typing 1.2s infinite ease-in-out;
   }
   .wa-typing span:nth-child(2) { animation-delay: 0.15s; }
@@ -206,7 +206,7 @@
     color: #6b746f;
   }
   .auth-input:focus {
-    border-bottom-color: #a3e635;
+    border-bottom-color: #5FBA82;
   }
 
   /* ── Auth primary button ── */
@@ -237,7 +237,7 @@
   .bubble-markdown code {
     font-family: Consolas, 'Courier New', monospace;
     background: rgba(163, 230, 53, 0.12);
-    color: #c4f06a;
+    color: #86d2a3;
     padding: 1px 4px;
     border-radius: 3px;
     font-size: 12.5px;
@@ -261,7 +261,7 @@
     font-style: italic;
   }
   .bubble-markdown a {
-    color: #a3e635;
+    color: #5FBA82;
     text-decoration: underline;
     word-break: break-all;
   }
@@ -273,7 +273,7 @@
     margin: 4px 0 2px;
   }
   .bubble-markdown blockquote {
-    border-left: 3px solid #a3e635;
+    border-left: 3px solid #5FBA82;
     padding-left: 8px;
     margin: 4px 0;
     color: #b3bdb7;

@@ -25,29 +25,23 @@ function NavButton({ item, active, onClick }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        width: '44px',
-        height: '44px',
-        borderRadius: '12px',
+        width: '34px',
+        height: '34px',
+        borderRadius: '8px',
         border: 'none',
         cursor: 'pointer',
-        color: isActive ? '#0c0e0d' : '#8a958f',
-        backgroundColor: isActive ? '#a3e635' : 'transparent',
+        color: isActive ? '#5FBA82' : '#8a958f',
+        backgroundColor: isActive ? 'rgba(95, 186, 130, 0.12)' : 'transparent',
         transition: 'background-color 120ms ease, color 120ms ease',
       }}
       onMouseEnter={(e) => {
-        if (!isActive) {
-          e.currentTarget.style.backgroundColor = '#1e221e'
-          e.currentTarget.style.color = '#e9edec'
-        }
+        if (!isActive) e.currentTarget.style.color = '#e9edec'
       }}
       onMouseLeave={(e) => {
-        if (!isActive) {
-          e.currentTarget.style.backgroundColor = 'transparent'
-          e.currentTarget.style.color = '#8a958f'
-        }
+        if (!isActive) e.currentTarget.style.color = '#8a958f'
       }}
     >
-      <Icon size={22} />
+      <Icon size={18} />
     </button>
   )
 }
@@ -104,24 +98,23 @@ export default function Sidebar({ active, onNavigate }) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: '44px',
-            height: '44px',
-            borderRadius: '12px',
+            width: '34px',
+            height: '34px',
+            borderRadius: '8px',
             border: 'none',
             cursor: 'pointer',
             color: '#8a958f',
             backgroundColor: 'transparent',
+            transition: 'color 120ms ease',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#2a1d1d'
             e.currentTarget.style.color = '#f87171'
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent'
             e.currentTarget.style.color = '#8a958f'
           }}
         >
-          <LogOut size={20} />
+          <LogOut size={18} />
         </button>
       </div>
     </div>

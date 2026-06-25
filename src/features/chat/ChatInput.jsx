@@ -129,7 +129,7 @@ export default function ChatInput({ onSend, isStreaming, onCancel }) {
             style={{
               width: '40px',
               height: '40px',
-              backgroundColor: '#a3e635',
+              backgroundColor: '#5FBA82',
               color: '#0c0e0d',
               border: 'none',
               cursor: 'pointer',
@@ -138,7 +138,7 @@ export default function ChatInput({ onSend, isStreaming, onCancel }) {
               transition: 'background-color 0.15s',
             }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#b6f04a')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#a3e635')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#5FBA82')}
           >
             <Send size={18} style={{ transform: 'translateX(-1px)' }} />
           </button>

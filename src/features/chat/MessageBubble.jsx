@@ -38,7 +38,7 @@ function BubbleTimestamp({ isoString, status, isOutgoing }) {
           ) : status === 'streaming' ? (
             <Check size={15} color="rgba(233,247,223,0.55)" />
           ) : status === 'read' ? (
-            <CheckCheck size={15} color="#a3e635" />
+            <CheckCheck size={15} color="#5FBA82" />
           ) : (
             <CheckCheck size={15} color="rgba(233,247,223,0.55)" />
           )}
@@ -78,9 +78,9 @@ function ConsentButtons({ active, onAccept, onRefuse }) {
         onClick={active ? onAccept : undefined}
         style={{
           ...baseStyle,
-          backgroundColor: '#a3e635',
+          backgroundColor: '#5FBA82',
           color: '#0c0e0d',
-          borderColor: '#a3e635',
+          borderColor: '#5FBA82',
         }}
       >
         Acepto
@@ -133,9 +133,9 @@ function PhoneConfirmButtons({ active, directive, onSend }) {
         onClick={active ? () => onSend(directive.yes || 'Sí') : undefined}
         style={{
           ...directiveButtonStyle(active),
-          backgroundColor: '#a3e635',
+          backgroundColor: '#5FBA82',
           color: '#0c0e0d',
-          borderColor: '#a3e635',
+          borderColor: '#5FBA82',
         }}
       >
         Sí
@@ -192,9 +192,9 @@ function UploadWidget({ active, directive, onUpload, kind = 'prescription', butt
           alignItems: 'center',
           justifyContent: 'center',
           gap: '8px',
-          backgroundColor: '#a3e635',
+          backgroundColor: '#5FBA82',
           color: '#0c0e0d',
-          borderColor: '#a3e635',
+          borderColor: '#5FBA82',
         }}
       >
         <Paperclip size={16} />
