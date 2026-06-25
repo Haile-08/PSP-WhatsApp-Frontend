@@ -20,7 +20,7 @@ const MAX_USERNAME_LENGTH = 50
 // sandbox number. Both are overridable via env so prod can point at the real
 // WhatsApp Business number once out of the sandbox.
 const WHATSAPP_SANDBOX_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '14155238886'
-const WHATSAPP_JOIN_CODE = import.meta.env.VITE_WHATSAPP_JOIN_CODE || 'join be-yard'
+const WHATSAPP_JOIN_CODE = import.meta.env.VITE_WHATSAPP_JOIN_CODE || 'join rhyme-year'
 const WHATSAPP_JOIN_URL = `https://wa.me/${WHATSAPP_SANDBOX_NUMBER}?text=${encodeURIComponent(
   WHATSAPP_JOIN_CODE
 )}`
