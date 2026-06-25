@@ -32,9 +32,13 @@ import {
   ClipboardCheck,
   Award,
   BadgeCheck,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from 'lucide-react'
 import Avatar from '../../components/Avatar'
 import DropdownMenu from '../../components/DropdownMenu'
+import Sidebar from './Sidebar'
+import DashboardView from './DashboardView'
 import MessageBubble from '../chat/MessageBubble'
 import DateSeparator from '../chat/DateSeparator'
 import ChatInput from '../chat/ChatInput'
@@ -322,7 +326,7 @@ function UserListItem({ user, selected, onClick }) {
   )
 }
 
-function UserList({ users, selectedUserId, onSelect }) {
+function UserList({ users, selectedUserId, onSelect, collapsed, onToggleCollapse }) {
   const [query, setQuery] = useState('')
 
   const filtered = useMemo(() => {
@@ -335,12 +339,80 @@ function UserList({ users, selectedUserId, onSelect }) {
     )
   }, [users, query])
 
+  // Collapsed rail: a slim strip of avatars so the operator can still switch
+  // patients without the full list eating horizontal space.
+  if (collapsed) {
+    return (
+      <div
+        className="flex flex-col items-center shrink-0"
+        style={{ width: '64px', borderRight: '1px solid #262b27', backgroundColor: '#101210' }}
+      >
+        <div
+          className="flex items-center justify-center shrink-0"
+          style={{ height: '60px', width: '100%', borderBottom: '1px solid #262b27' }}
+        >
+          <button
+            type="button"
+            className="icon-btn"
+            title="Expand patient list"
+            aria-label="Expand patient list"
+            onClick={onToggleCollapse}
+          >
+            <PanelLeftOpen size={20} />
+          </button>
+        </div>
+        <div style={{ flex: 1, overflowY: 'auto', width: '100%', padding: '8px 0' }}>
+          {users.map((u) => {
+            const selected = u.id === selectedUserId
+            return (
+              <button
+                key={u.id}
+                type="button"
+                title={u.username}
+                onClick={() => onSelect(u.id)}
+                style={{
+                  position: 'relative',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '100%',
+                  padding: '6px 0',
+                  border: 'none',
+                  borderLeft: selected ? '3px solid #a3e635' : '3px solid transparent',
+                  backgroundColor: selected ? '#1e221e' : 'transparent',
+                  cursor: 'pointer',
+                }}
+              >
+                <Avatar name={u.username} size={36} />
+                {u.open_escalations > 0 && (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      top: '4px',
+                      right: '12px',
+                      width: '9px',
+                      height: '9px',
+                      borderRadius: '50%',
+                      backgroundColor: '#f87171',
+                      border: '2px solid #101210',
+                    }}
+                  />
+                )}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="flex flex-col" style={{ width: '380px', borderRight: '1px solid #262b27', backgroundColor: '#101210' }}>
+    <div className="flex flex-col shrink-0" style={{ width: '380px', borderRight: '1px solid #262b27', backgroundColor: '#101210' }}>
       <AdminHeader />
-      <div style={{ padding: '8px 12px', backgroundColor: '#101210' }}>
+      <div className="flex items-center" style={{ padding: '8px 12px', gap: '8px', backgroundColor: '#101210' }}>
         <div
           style={{
+            flex: 1,
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
@@ -366,6 +438,15 @@ function UserList({ users, selectedUserId, onSelect }) {
             }}
           />
         </div>
+        <button
+          type="button"
+          className="icon-btn"
+          title="Collapse patient list"
+          aria-label="Collapse patient list"
+          onClick={onToggleCollapse}
+        >
+          <PanelLeftClose size={20} />
+        </button>
       </div>
       <div style={{ flex: 1, overflowY: 'auto' }}>
         {filtered.length === 0 && (
@@ -1831,12 +1912,15 @@ function EmptyState() {
   )
 }
 
-export default function AdminPage() {
+// The Patients workspace: the live contact list (collapsible), the read-only
+// conversation feed, and the per-phase onboarding profile pane.
+function PatientsView() {
   const { data: users = [] } = useAdminUsersQuery()
   // ``null`` means "no manual selection yet" — the render then falls back
   // to the user with the most recent open escalation so the operator's
   // eye lands somewhere useful without us calling setState in an effect.
   const [selectedUserId, setSelectedUserId] = useState(null)
+  const [listCollapsed, setListCollapsed] = useState(false)
 
   const selectedUser = useMemo(() => {
     if (users.length === 0) return null
@@ -1845,6 +1929,32 @@ export default function AdminPage() {
     }
     return users.find((u) => u.open_escalations > 0) || users[0] || null
   }, [users, selectedUserId])
+
+  return (
+    <>
+      <UserList
+        users={users}
+        selectedUserId={selectedUser?.id ?? null}
+        onSelect={setSelectedUserId}
+        collapsed={listCollapsed}
+        onToggleCollapse={() => setListCollapsed((v) => !v)}
+      />
+      {selectedUser ? (
+        <>
+          <ConversationPane user={selectedUser} />
+          <ProfilePane user={selectedUser} />
+        </>
+      ) : (
+        <EmptyState />
+      )}
+    </>
+  )
+}
+
+export default function AdminPage() {
+  // Which workspace the icon rail has selected: the live Dashboard or the
+  // Patients console. Defaults to the Dashboard so admins land on the metrics.
+  const [view, setView] = useState('dashboard')
 
   return (
     <div
@@ -1856,19 +1966,8 @@ export default function AdminPage() {
         backgroundColor: '#0c0e0d',
       }}
     >
-      <UserList
-        users={users}
-        selectedUserId={selectedUser?.id ?? null}
-        onSelect={setSelectedUserId}
-      />
-      {selectedUser ? (
-        <>
-          <ConversationPane user={selectedUser} />
-          <ProfilePane user={selectedUser} />
-        </>
-      ) : (
-        <EmptyState />
-      )}
+      <Sidebar active={view} onNavigate={setView} />
+      {view === 'dashboard' ? <DashboardView /> : <PatientsView />}
     </div>
   )
 }

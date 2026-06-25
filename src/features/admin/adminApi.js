@@ -10,11 +10,18 @@ const DETAIL_POLL_MS = 4000
 export const adminApi = createApi({
   reducerPath: 'adminApi',
   baseQuery,
-  tagTypes: ['AdminUsers', 'AdminConversation', 'AdminEscalations', 'AdminProfile'],
+  tagTypes: ['AdminUsers', 'AdminConversation', 'AdminEscalations', 'AdminProfile', 'AdminStats'],
   endpoints: (builder) => ({
     adminUsers: builder.query({
       query: () => '/admin/users',
       providesTags: ['AdminUsers'],
+      pollingInterval: USERS_POLL_MS,
+    }),
+    adminStats: builder.query({
+      query: () => '/admin/stats',
+      providesTags: ['AdminStats'],
+      // The dashboard is a live operations view: poll on the same cadence as
+      // the contact list so KPIs and charts track the database without a refresh.
       pollingInterval: USERS_POLL_MS,
     }),
     adminUserProfile: builder.query({
@@ -125,6 +132,7 @@ export const adminApi = createApi({
 
 export const {
   useAdminUsersQuery,
+  useAdminStatsQuery,
   useAdminUserProfileQuery,
   useAdminUserConversationQuery,
   useAdminUserEscalationsQuery,

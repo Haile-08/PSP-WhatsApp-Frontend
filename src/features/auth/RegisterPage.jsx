@@ -15,7 +15,6 @@ import './auth.css'
 const MIN_PASSWORD_LENGTH = 8
 const MIN_USERNAME_LENGTH = 3
 const MAX_USERNAME_LENGTH = 50
-const USERNAME_PATTERN = /^[A-Za-z0-9._-]+$/
 
 // Twilio WhatsApp sandbox: the patient joins by sending "join <code>" to the
 // sandbox number. Both are overridable via env so prod can point at the real
@@ -120,7 +119,6 @@ const COPY = {
     usernameRequired: 'Username is required',
     usernameShort: 'Username must be at least 3 characters',
     usernameMax: 'Must be 50 characters or fewer',
-    usernamePattern: "Use only letters, digits, '.', '_' and '-'",
   },
   es: {
     asideTitle: 'Comienza con nosotros',
@@ -164,7 +162,6 @@ const COPY = {
     usernameRequired: 'El nombre de usuario es obligatorio',
     usernameShort: 'El nombre de usuario debe tener al menos 3 caracteres',
     usernameMax: 'Debe tener 50 caracteres o menos',
-    usernamePattern: "Usa solo letras, dígitos, '.', '_' y '-'",
   },
 }
 
@@ -175,8 +172,7 @@ const registerSchema = z.object({
     .trim()
     .min(1, 'usernameRequired')
     .min(MIN_USERNAME_LENGTH, 'usernameShort')
-    .max(MAX_USERNAME_LENGTH, 'usernameMax')
-    .regex(USERNAME_PATTERN, 'usernamePattern'),
+    .max(MAX_USERNAME_LENGTH, 'usernameMax'),
   phone: z
     .string()
     .min(1, 'phoneRequired')
