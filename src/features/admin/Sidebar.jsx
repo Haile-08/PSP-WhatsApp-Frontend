@@ -1,5 +1,5 @@
 import { useDispatch } from 'react-redux'
-import { LayoutDashboard, Users, Boxes, LogOut } from 'lucide-react'
+import { LayoutDashboard, Users, LogOut } from 'lucide-react'
 import { logout } from '../auth/authSlice'
 
 // The far-left icon rail of the admin console. Two destinations only —
@@ -65,64 +65,65 @@ export default function Sidebar({ active, onNavigate }) {
         height: '100%',
         backgroundColor: '#151815',
         borderRight: '1px solid #262b27',
-        padding: '16px 0',
-        gap: '8px',
       }}
     >
+      {/* Brand mark sits in a 60px-tall block carrying the same bottom border
+          as the content headers, so that header line runs unbroken across the
+          sidebar too. */}
       <div
+        className="flex items-center justify-center shrink-0"
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '40px',
-          height: '40px',
-          borderRadius: '12px',
-          backgroundColor: '#1e221e',
-          color: '#a3e635',
-          marginBottom: '16px',
+          width: '100%',
+          height: '60px',
+          borderBottom: '1px solid #262b27',
         }}
       >
-        <Boxes size={24} />
+        <img src="/icon.svg" alt="PSP" width={32} height={32} />
       </div>
 
-      {NAV.map((item) => (
-        <NavButton
-          key={item.id}
-          item={item}
-          active={active}
-          onClick={onNavigate}
-        />
-      ))}
-
-      <button
-        type="button"
-        onClick={() => dispatch(logout())}
-        title="Logout"
-        aria-label="Logout"
-        style={{
-          marginTop: 'auto',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '44px',
-          height: '44px',
-          borderRadius: '12px',
-          border: 'none',
-          cursor: 'pointer',
-          color: '#8a958f',
-          backgroundColor: 'transparent',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = '#2a1d1d'
-          e.currentTarget.style.color = '#f87171'
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'transparent'
-          e.currentTarget.style.color = '#8a958f'
-        }}
+      <div
+        className="flex flex-col items-center"
+        style={{ flex: 1, width: '100%', padding: '16px 0', gap: '8px' }}
       >
-        <LogOut size={20} />
-      </button>
+        {NAV.map((item) => (
+          <NavButton
+            key={item.id}
+            item={item}
+            active={active}
+            onClick={onNavigate}
+          />
+        ))}
+
+        <button
+          type="button"
+          onClick={() => dispatch(logout())}
+          title="Logout"
+          aria-label="Logout"
+          style={{
+            marginTop: 'auto',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '44px',
+            height: '44px',
+            borderRadius: '12px',
+            border: 'none',
+            cursor: 'pointer',
+            color: '#8a958f',
+            backgroundColor: 'transparent',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#2a1d1d'
+            e.currentTarget.style.color = '#f87171'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent'
+            e.currentTarget.style.color = '#8a958f'
+          }}
+        >
+          <LogOut size={20} />
+        </button>
+      </div>
     </div>
   )
 }
