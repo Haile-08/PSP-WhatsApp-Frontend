@@ -23,6 +23,15 @@ import {
   Activity,
   CalendarCheck,
   PhoneCall,
+  PackageCheck,
+  Building2,
+  Sparkles,
+  AlertCircle,
+  Truck,
+  Gauge,
+  ClipboardCheck,
+  Award,
+  BadgeCheck,
 } from 'lucide-react'
 import Avatar from '../../components/Avatar'
 import DropdownMenu from '../../components/DropdownMenu'
@@ -36,6 +45,10 @@ import {
   useAdminUserConversationQuery,
   useSendAdminMessageMutation,
   useConfirmAppointmentMutation,
+  useAuthorizeShipmentMutation,
+  useRejectShipmentMutation,
+  useApproveClaimMutation,
+  useRejectClaimMutation,
 } from './adminApi'
 
 // Reason codes mirror app/models/escalation.py — we render friendly
@@ -741,14 +754,114 @@ const INSURANCE_STATUS_LABELS = {
   active: 'Active',
 }
 
+// Phase 6 — Innovaderm risk band → display meta (drives the verdict banner).
+const RISK_BAND_META = {
+  low: { label: 'Low risk', color: '#a3e635' },
+  medium: { label: 'Medium risk', color: '#fbbf24' },
+  high: { label: 'High risk', color: '#f87171' },
+}
+
+const RECOMMENDATION_META = {
+  recommend: { label: 'Recommended', color: '#a3e635' },
+  review: { label: 'Needs review', color: '#fbbf24' },
+  not_recommended: { label: 'Not recommended', color: '#f87171' },
+}
+
+// Colour per scored-factor status in the "why this score" breakdown.
+const FACTOR_STATUS_COLOR = {
+  ok: '#a3e635',
+  warn: '#fbbf24',
+  risk: '#f87171',
+  gap: '#9aa5ad',
+}
+
+const HOLDER_TYPE_LABELS = {
+  persona_fisica: 'Persona física',
+  persona_moral: 'Persona moral',
+}
+
+const POLICY_KIND_LABELS = {
+  individual: 'Individual',
+  collective: 'Collective (group)',
+}
+
+function contratanteLabel(holderType, policyKind) {
+  const h = HOLDER_TYPE_LABELS[holderType]
+  const p = POLICY_KIND_LABELS[policyKind]
+  if (h && p) return `${h} → ${p}`
+  return h || p || null
+}
+
+// The three lenses the operator/broker can switch the profile pane between.
+// Mirrors the patient's data domains: identity/clinical, the insurance policy,
+// and the operational broker/scheduling track.
+const PROFILE_VIEWS = [
+  { key: 'personal', label: 'Personal', icon: UserIcon },
+  { key: 'insurance', label: 'Insurance', icon: ShieldCheck },
+  { key: 'other', label: 'Broker', icon: PackageCheck },
+]
+
+function ProfileViewToggle({ view, onChange }) {
+  return (
+    <div
+      className="flex"
+      style={{
+        gap: '4px',
+        padding: '4px',
+        marginBottom: '14px',
+        backgroundColor: '#151815',
+        border: '1px solid #262b27',
+        borderRadius: '10px',
+      }}
+    >
+      {PROFILE_VIEWS.map((item) => {
+        // Destructure in the body so the uppercase ``Icon`` matches the lint
+        // varsIgnorePattern (this config has no react/jsx-uses-vars rule).
+        const { key, label, icon: Icon } = item
+        const active = view === key
+        return (
+          <button
+            key={key}
+            type="button"
+            onClick={() => onChange(key)}
+            style={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              padding: '7px 8px',
+              borderRadius: '7px',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '12.5px',
+              fontWeight: 600,
+              fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
+              backgroundColor: active ? '#a3e635' : 'transparent',
+              color: active ? '#0c0e0d' : '#8a958f',
+            }}
+          >
+            <Icon size={14} />
+            {label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 function ProfilePane({ user }) {
   const { data: profile, isFetching } = useAdminUserProfileQuery(user.id)
   const currentPhase = user.onboarding_phase
+  const [view, setView] = useState('personal')
 
   const p1 = profile?.phase1
   const p2 = profile?.phase2
   const p3 = profile?.phase3
   const p5 = profile?.phase5
+  const p6 = profile?.phase6
+  const p7 = profile?.phase7
+  const p8 = profile?.phase8
   const ins = p2?.insurance
 
   return (
@@ -843,6 +956,10 @@ function ProfilePane({ user }) {
               </div>
             </div>
 
+            <ProfileViewToggle view={view} onChange={setView} />
+
+            {view === 'personal' && (
+            <>
             {/* Phase 1 — Registration */}
             <SectionCard
               phase={1}
@@ -861,7 +978,11 @@ function ProfilePane({ user }) {
                 onView={() => openDocument(user.id, 'prescription')}
               />
             </SectionCard>
+            </>
+            )}
 
+            {view === 'insurance' && (
+            <>
             {/* Phase 2 — Pre-Verification */}
             <SectionCard
               phase={2}
@@ -925,7 +1046,11 @@ function ProfilePane({ user }) {
                 />
               </div>
             </SectionCard>
+            </>
+            )}
 
+            {view === 'personal' && (
+            <>
             {/* Phase 3 — Clinical Information */}
             <SectionCard
               phase={3}
@@ -972,9 +1097,33 @@ function ProfilePane({ user }) {
                 }
               />
             </SectionCard>
+            </>
+            )}
 
+            {view === 'other' && (
+            <>
             {/* Phase 5 — Scheduling */}
             <SchedulingSection userId={user.id} phase5={p5} currentPhase={currentPhase} />
+
+            {/* Phase 6 — Broker Evaluation & Galderma Shipment */}
+            <BrokerShipmentSection
+              userId={user.id}
+              phase6={p6}
+              insurance={ins}
+              currentPhase={currentPhase}
+            />
+
+            {/* Phase 7 — Claim Follow-up (Day 20) */}
+            <ClaimFollowUpSection
+              userId={user.id}
+              phase7={p7}
+              currentPhase={currentPhase}
+            />
+
+            {/* Phase 8 — Additional Benefits */}
+            <BenefitsSection phase8={p8} currentPhase={currentPhase} />
+            </>
+            )}
           </>
         )}
       </div>
@@ -1072,6 +1221,588 @@ function SchedulingSection({ userId, phase5, currentPhase }) {
           )}
         </>
       )}
+    </SectionCard>
+  )
+}
+
+// One row in the "why this score" factor breakdown: a status-coloured dot, the
+// factor label + detail, and its contribution to the risk score.
+function FactorRow({ factor }) {
+  const color = FACTOR_STATUS_COLOR[factor.status] || '#8a958f'
+  return (
+    <div className="flex items-start" style={{ gap: '9px', padding: '6px 0' }}>
+      <span
+        style={{
+          width: '8px',
+          height: '8px',
+          borderRadius: '50%',
+          backgroundColor: color,
+          marginTop: '6px',
+          flexShrink: 0,
+        }}
+      />
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <div className="flex items-center justify-between" style={{ gap: '8px' }}>
+          <span
+            style={{
+              fontSize: '13px',
+              fontWeight: 600,
+              color: '#e9edec',
+              fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
+            }}
+          >
+            {factor.label}
+          </span>
+          {factor.weight !== 0 && (
+            <span style={{ fontSize: '12px', fontWeight: 600, color, whiteSpace: 'nowrap' }}>
+              {factor.weight > 0 ? `+${factor.weight}` : factor.weight}
+            </span>
+          )}
+        </div>
+        {factor.detail && (
+          <div
+            style={{
+              fontSize: '12px',
+              color: '#9aa5ad',
+              marginTop: '1px',
+              fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
+            }}
+          >
+            {factor.detail}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function formatMxn(value) {
+  if (value === null || value === undefined) return null
+  const n = Number(value)
+  if (Number.isNaN(n)) return String(value)
+  return n.toLocaleString('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 })
+}
+
+// Phase 6 — the Broker Decision card. Surfaces the Innovaderm coverage-risk
+// verdict, the policy summary the broker asked for (plan + Básica coverage +
+// contratante type), the scored factors, the financial outlook and the AI note,
+// then the Authorize / Reject actions. Everything the broker needs to make the
+// Galderma-shipment call without leaving the panel.
+function BrokerShipmentSection({ userId, phase6, insurance, currentPhase }) {
+  const [authorizeShipment, { isLoading: authing }] = useAuthorizeShipmentMutation()
+  const [rejectShipment, { isLoading: rejecting }] = useRejectShipmentMutation()
+  const busy = authing || rejecting
+  const status = phaseStatus(currentPhase, 6)
+
+  const sectionProps = {
+    phase: 6,
+    title: 'Broker Evaluation',
+    subtitle: 'Coverage-risk assessment & Galderma shipment.',
+    icon: PackageCheck,
+    status,
+  }
+
+  if (currentPhase < 6) {
+    return (
+      <SectionCard {...sectionProps}>
+        <div style={{ fontSize: '13px', color: '#5c655f', fontStyle: 'italic', padding: '6px 0' }}>
+          Available once the welcome call is confirmed.
+        </div>
+      </SectionCard>
+    )
+  }
+
+  if (!phase6?.has_evaluation) {
+    return (
+      <SectionCard {...sectionProps}>
+        <div style={{ fontSize: '13px', color: '#8a958f', padding: '6px 0' }}>
+          Scoring coverage with the Innovaderm algorithm…
+        </div>
+      </SectionCard>
+    )
+  }
+
+  const band = RISK_BAND_META[phase6.risk_band] || { label: phase6.risk_band, color: '#8a958f' }
+  const rec = RECOMMENDATION_META[phase6.recommendation] || {
+    label: phase6.recommendation,
+    color: '#8a958f',
+  }
+  const decided = phase6.broker_decision !== 'pending'
+  const authorized = phase6.broker_decision === 'authorized'
+  const fin = phase6.financial || {}
+  const contratante = contratanteLabel(phase6.holder_type, phase6.policy_kind)
+
+  const handleAuthorize = async () => {
+    try {
+      await authorizeShipment(userId).unwrap()
+    } catch {
+      // Disabled state resets; the operator can retry.
+    }
+  }
+  const handleReject = async () => {
+    try {
+      await rejectShipment(userId).unwrap()
+    } catch {
+      // Disabled state resets; the operator can retry.
+    }
+  }
+
+  return (
+    <SectionCard {...sectionProps}>
+      {/* Verdict banner */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          padding: '11px 13px',
+          borderRadius: '10px',
+          backgroundColor: `${rec.color}14`,
+          border: `1px solid ${rec.color}40`,
+          marginTop: '4px',
+        }}
+      >
+        <Gauge size={22} color={rec.color} style={{ flexShrink: 0 }} />
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ fontSize: '15px', fontWeight: 700, color: rec.color }}>{rec.label}</div>
+          <div style={{ fontSize: '12px', color: '#c2ccc6' }}>
+            {band.label} · Score {phase6.risk_score}/100
+          </div>
+        </div>
+      </div>
+
+      {/* Policy summary — the broker's asks */}
+      <div style={{ marginTop: '6px' }}>
+        <ProfileField icon={Building2} label="Contratante" value={contratante} />
+        <ProfileField icon={Sparkles} label="Plan" value={insurance?.plan} />
+        <ProfileField icon={CreditCard} label="Sum insured" value={insurance?.sum_insured} />
+        <ProfileField icon={ShieldCheck} label="Deductible" value={insurance?.deductible} />
+        <ProfileField icon={Activity} label="Coinsurance" value={insurance?.coinsurance} />
+        <ProfileField icon={UserIcon} label="Client ref" value={phase6.client_ref} />
+      </div>
+
+      {/* Why this score */}
+      {phase6.factors?.length > 0 && (
+        <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px dashed #262b27' }}>
+          <div
+            style={{
+              fontSize: '12px',
+              fontWeight: 600,
+              color: '#c2ccc6',
+              textTransform: 'uppercase',
+              letterSpacing: '0.4px',
+              marginBottom: '2px',
+            }}
+          >
+            Why this score
+          </div>
+          {phase6.factors.map((f, i) => (
+            <FactorRow key={i} factor={f} />
+          ))}
+        </div>
+      )}
+
+      {/* Financial outlook */}
+      {(fin.tope_coaseguro_mxn || fin.deductible_mxn) && (
+        <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px dashed #262b27' }}>
+          <div
+            style={{
+              fontSize: '12px',
+              fontWeight: 600,
+              color: '#c2ccc6',
+              textTransform: 'uppercase',
+              letterSpacing: '0.4px',
+            }}
+          >
+            Financial outlook
+          </div>
+          <ProfileField icon={CreditCard} label="Deductible" value={formatMxn(fin.deductible_mxn)} />
+          <ProfileField
+            icon={Activity}
+            label="Coinsurance"
+            value={fin.coinsurance_pct ? `${fin.coinsurance_pct}%` : null}
+          />
+          <ProfileField
+            icon={CreditCard}
+            label="Coaseguro cap (tope)"
+            value={formatMxn(fin.tope_coaseguro_mxn)}
+          />
+        </div>
+      )}
+
+      {/* AI asesor note */}
+      {phase6.note && (
+        <div
+          style={{
+            marginTop: '12px',
+            padding: '10px 11px',
+            backgroundColor: '#101210',
+            border: '1px solid #262b27',
+            borderRadius: '8px',
+          }}
+        >
+          <div
+            className="flex items-center"
+            style={{ gap: '6px', fontSize: '11.5px', color: '#8a958f', marginBottom: '5px' }}
+          >
+            <Sparkles size={13} color="#a3e635" />
+            Asesor note (AI)
+          </div>
+          <div
+            style={{
+              fontSize: '13px',
+              color: '#d6ddd9',
+              whiteSpace: 'pre-wrap',
+              fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif',
+            }}
+          >
+            {phase6.note}
+          </div>
+        </div>
+      )}
+
+      {/* Decision actions / result */}
+      <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid #262b27' }}>
+        {!decided && (
+          <div className="flex" style={{ gap: '8px' }}>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={handleAuthorize}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '7px',
+                padding: '10px 12px',
+                borderRadius: '8px',
+                fontSize: '13.5px',
+                fontWeight: 600,
+                cursor: busy ? 'not-allowed' : 'pointer',
+                opacity: busy ? 0.55 : 1,
+                backgroundColor: '#a3e635',
+                color: '#0c0e0d',
+                border: '1px solid #a3e635',
+              }}
+            >
+              <PackageCheck size={15} />
+              {authing ? 'Authorizing…' : 'Authorize shipment'}
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={handleReject}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '7px',
+                padding: '10px 12px',
+                borderRadius: '8px',
+                fontSize: '13.5px',
+                fontWeight: 600,
+                cursor: busy ? 'not-allowed' : 'pointer',
+                opacity: busy ? 0.55 : 1,
+                backgroundColor: 'transparent',
+                color: '#f87171',
+                border: '1px solid #f8717155',
+              }}
+            >
+              <AlertCircle size={15} />
+              {rejecting ? 'Rejecting…' : 'Reject'}
+            </button>
+          </div>
+        )}
+
+        {decided && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '9px',
+              padding: '9px 11px',
+              borderRadius: '8px',
+              backgroundColor: authorized ? '#1f261c' : '#26201f',
+              border: `1px solid ${authorized ? '#2c3a26' : '#3a2626'}`,
+            }}
+          >
+            {authorized ? (
+              <CheckCircle2 size={17} color="#a3e635" style={{ flexShrink: 0 }} />
+            ) : (
+              <AlertCircle size={17} color="#f87171" style={{ flexShrink: 0 }} />
+            )}
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ fontSize: '13.5px', fontWeight: 600, color: '#e9edec' }}>
+                {authorized ? 'Shipment authorized' : 'Policy not supported'}
+              </div>
+              <div style={{ fontSize: '11.5px', color: '#8a958f' }}>
+                {formatRelativeTime(phase6.decided_at)}
+                {authorized && phase6.doses_shipped ? ` · ${phase6.doses_shipped} doses` : ''}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {authorized && (
+          <div style={{ marginTop: '8px' }}>
+            <ProfileField
+              icon={Truck}
+              label="Galderma shipment"
+              value={
+                phase6.shipment_status === 'confirmed'
+                  ? 'Confirmed'
+                  : phase6.shipment_status === 'dispatched'
+                    ? 'Dispatched'
+                    : 'Pending'
+              }
+            />
+            {phase6.galderma_notified_at && (
+              <ProfileField
+                icon={Mail}
+                label="Galderma notified"
+                value={formatRelativeTime(phase6.galderma_notified_at)}
+              />
+            )}
+          </div>
+        )}
+      </div>
+    </SectionCard>
+  )
+}
+
+function formatDueDate(iso) {
+  if (!iso) return null
+  try {
+    return new Date(iso).toLocaleDateString('es-MX', {
+      weekday: 'long',
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    })
+  } catch {
+    return new Date(iso).toLocaleDateString()
+  }
+}
+
+// Phase 7 — the Claim Follow-up (Day 20) card. Once the first doses ship the
+// broker follows up on the patient's insurance claim ~20 days later, reviews the
+// full enrollment record, and then approves the patient (unlocking Phase 8 — full
+// benefits) or marks the claim not approved. The single "Approve patient" button
+// is the operator action that tags the patient approved and messages them.
+function ClaimFollowUpSection({ userId, phase7, currentPhase }) {
+  const [approveClaim, { isLoading: approving }] = useApproveClaimMutation()
+  const [rejectClaim, { isLoading: rejecting }] = useRejectClaimMutation()
+  const busy = approving || rejecting
+  const status = phaseStatus(currentPhase, 7)
+
+  const sectionProps = {
+    phase: 7,
+    title: 'Claim Follow-up',
+    subtitle: 'Day-20 claim review & patient approval.',
+    icon: ClipboardCheck,
+    status,
+  }
+
+  if (currentPhase < 7) {
+    return (
+      <SectionCard {...sectionProps}>
+        <div style={{ fontSize: '13px', color: '#5c655f', fontStyle: 'italic', padding: '6px 0' }}>
+          Available once the Galderma shipment is authorized.
+        </div>
+      </SectionCard>
+    )
+  }
+
+  if (!phase7?.has_claim_follow_up) {
+    return (
+      <SectionCard {...sectionProps}>
+        <div style={{ fontSize: '13px', color: '#8a958f', padding: '6px 0' }}>
+          Preparing the Day-20 claim review…
+        </div>
+      </SectionCard>
+    )
+  }
+
+  const decided = phase7.decision !== 'pending'
+  const approved = phase7.decision === 'approved'
+  const dueLabel = formatDueDate(phase7.follow_up_due_at)
+
+  const handleApprove = async () => {
+    try {
+      await approveClaim(userId).unwrap()
+    } catch {
+      // Disabled state resets; the operator can retry.
+    }
+  }
+  const handleReject = async () => {
+    try {
+      await rejectClaim(userId).unwrap()
+    } catch {
+      // Disabled state resets; the operator can retry.
+    }
+  }
+
+  return (
+    <SectionCard {...sectionProps}>
+      <div style={{ marginTop: '4px' }}>
+        <ProfileField icon={Clock} label="Day-20 review due" value={dueLabel || 'Due now'} />
+        <ProfileField icon={UserIcon} label="Client ref" value={phase7.client_ref} />
+      </div>
+
+      {phase7.note && (
+        <div
+          style={{
+            marginTop: '12px',
+            padding: '10px 11px',
+            backgroundColor: '#101210',
+            border: '1px solid #262b27',
+            borderRadius: '8px',
+            fontSize: '13px',
+            color: '#d6ddd9',
+            whiteSpace: 'pre-wrap',
+          }}
+        >
+          {phase7.note}
+        </div>
+      )}
+
+      <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid #262b27' }}>
+        {!decided && (
+          <div className="flex" style={{ gap: '8px' }}>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={handleApprove}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '7px',
+                padding: '10px 12px',
+                borderRadius: '8px',
+                fontSize: '13.5px',
+                fontWeight: 600,
+                cursor: busy ? 'not-allowed' : 'pointer',
+                opacity: busy ? 0.55 : 1,
+                backgroundColor: '#a3e635',
+                color: '#0c0e0d',
+                border: '1px solid #a3e635',
+              }}
+            >
+              <BadgeCheck size={15} />
+              {approving ? 'Approving…' : 'Approve patient'}
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={handleReject}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '7px',
+                padding: '10px 12px',
+                borderRadius: '8px',
+                fontSize: '13.5px',
+                fontWeight: 600,
+                cursor: busy ? 'not-allowed' : 'pointer',
+                opacity: busy ? 0.55 : 1,
+                backgroundColor: 'transparent',
+                color: '#f87171',
+                border: '1px solid #f8717155',
+              }}
+            >
+              <AlertCircle size={15} />
+              {rejecting ? 'Saving…' : 'Not approved'}
+            </button>
+          </div>
+        )}
+
+        {decided && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '9px',
+              padding: '9px 11px',
+              borderRadius: '8px',
+              backgroundColor: approved ? '#1f261c' : '#26201f',
+              border: `1px solid ${approved ? '#2c3a26' : '#3a2626'}`,
+            }}
+          >
+            {approved ? (
+              <CheckCircle2 size={17} color="#a3e635" style={{ flexShrink: 0 }} />
+            ) : (
+              <AlertCircle size={17} color="#f87171" style={{ flexShrink: 0 }} />
+            )}
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ fontSize: '13.5px', fontWeight: 600, color: '#e9edec' }}>
+                {approved ? 'Patient approved' : 'Claim not approved'}
+              </div>
+              <div style={{ fontSize: '11.5px', color: '#8a958f' }}>
+                {formatRelativeTime(phase7.decided_at)}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </SectionCard>
+  )
+}
+
+// Phase 8 — Additional Benefits. The terminal phase: a read-only banner that
+// surfaces the patient's "approved" tag and the moment their full benefits were
+// unlocked (the approval lives in the Phase 7 action above).
+function BenefitsSection({ phase8, currentPhase }) {
+  const status = phaseStatus(currentPhase, 8)
+  const sectionProps = {
+    phase: 8,
+    title: 'Additional Benefits',
+    subtitle: 'Full program benefits unlocked on approval.',
+    icon: Award,
+    status,
+  }
+
+  if (!phase8?.approved) {
+    return (
+      <SectionCard {...sectionProps}>
+        <div style={{ fontSize: '13px', color: '#5c655f', fontStyle: 'italic', padding: '6px 0' }}>
+          Unlocked once the patient is approved at the Day-20 review.
+        </div>
+      </SectionCard>
+    )
+  }
+
+  return (
+    <SectionCard {...sectionProps}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '9px',
+          marginTop: '4px',
+          padding: '9px 11px',
+          borderRadius: '8px',
+          backgroundColor: '#1f261c',
+          border: '1px solid #2c3a26',
+        }}
+      >
+        <Award size={17} color="#a3e635" style={{ flexShrink: 0 }} />
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ fontSize: '13.5px', fontWeight: 600, color: '#e9edec' }}>
+            Approved · Full benefits unlocked
+          </div>
+          <div style={{ fontSize: '11.5px', color: '#8a958f' }}>
+            {phase8.benefits_unlocked_at
+              ? formatRelativeTime(phase8.benefits_unlocked_at)
+              : 'Patient notified'}
+          </div>
+        </div>
+      </div>
     </SectionCard>
   )
 }

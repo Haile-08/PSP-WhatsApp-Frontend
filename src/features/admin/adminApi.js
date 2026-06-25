@@ -69,6 +69,57 @@ export const adminApi = createApi({
         'AdminUsers',
       ],
     }),
+    authorizeShipment: builder.mutation({
+      query: (userId) => ({
+        url: `/admin/users/${userId}/broker/authorize`,
+        method: 'POST',
+      }),
+      // Authorizing dispatches the Galderma order, advances the patient past
+      // Phase 6, and messages them — refresh profile + conversation + list.
+      invalidatesTags: (_r, _e, userId) => [
+        { type: 'AdminProfile', id: userId },
+        { type: 'AdminConversation', id: userId },
+        'AdminUsers',
+      ],
+    }),
+    rejectShipment: builder.mutation({
+      query: (userId) => ({
+        url: `/admin/users/${userId}/broker/reject`,
+        method: 'POST',
+      }),
+      // Rejecting parks the patient at "policy not supported" and messages them.
+      invalidatesTags: (_r, _e, userId) => [
+        { type: 'AdminProfile', id: userId },
+        { type: 'AdminConversation', id: userId },
+        'AdminUsers',
+      ],
+    }),
+    approveClaim: builder.mutation({
+      query: (userId) => ({
+        url: `/admin/users/${userId}/claim/approve`,
+        method: 'POST',
+      }),
+      // Approving the Day-20 claim tags the patient approved, advances them into
+      // Phase 8 (full benefits unlocked), and messages them — refresh profile +
+      // conversation + list.
+      invalidatesTags: (_r, _e, userId) => [
+        { type: 'AdminProfile', id: userId },
+        { type: 'AdminConversation', id: userId },
+        'AdminUsers',
+      ],
+    }),
+    rejectClaim: builder.mutation({
+      query: (userId) => ({
+        url: `/admin/users/${userId}/claim/reject`,
+        method: 'POST',
+      }),
+      // Marking the claim not approved parks the patient and messages them.
+      invalidatesTags: (_r, _e, userId) => [
+        { type: 'AdminProfile', id: userId },
+        { type: 'AdminConversation', id: userId },
+        'AdminUsers',
+      ],
+    }),
   }),
 })
 
@@ -80,4 +131,8 @@ export const {
   useSendAdminMessageMutation,
   useResolveEscalationMutation,
   useConfirmAppointmentMutation,
+  useAuthorizeShipmentMutation,
+  useRejectShipmentMutation,
+  useApproveClaimMutation,
+  useRejectClaimMutation,
 } = adminApi
