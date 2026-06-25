@@ -390,20 +390,20 @@ export default function DashboardView() {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
           <KpiCard icon={Users} label="Total patients" value={t.patients} />
           <KpiCard
-            Icon={CheckCircle2}
+            icon={CheckCircle2}
             label="Onboarding complete"
             value={t.completed}
             sub={`${t.completion_rate}% completion rate`}
           />
           <KpiCard icon={TrendingUp} label="In progress" value={t.in_progress} accent="#38bdf8" />
           <KpiCard
-            Icon={AlertTriangle}
+            icon={AlertTriangle}
             label="Open escalations"
             value={t.open_escalations}
             accent="#f87171"
           />
           <KpiCard
-            Icon={CalendarCheck}
+            icon={CalendarCheck}
             label="Appointments confirmed"
             value={t.appointments_confirmed}
             sub={`${t.appointments_booked} awaiting`}
