@@ -16,30 +16,15 @@ const MIN_PASSWORD_LENGTH = 8
 const MIN_USERNAME_LENGTH = 3
 const MAX_USERNAME_LENGTH = 50
 
-// Twilio WhatsApp sandbox: the patient joins by sending "join <code>" to the
-// sandbox number. Both are overridable via env so prod can point at the real
-// WhatsApp Business number once out of the sandbox.
-const WHATSAPP_SANDBOX_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '14155238886'
-const WHATSAPP_JOIN_CODE = import.meta.env.VITE_WHATSAPP_JOIN_CODE || 'join rhyme-year'
-const WHATSAPP_JOIN_URL = `https://wa.me/${WHATSAPP_SANDBOX_NUMBER}?text=${encodeURIComponent(
-  WHATSAPP_JOIN_CODE
-)}`
-
-// Sandbox quirk: the Twilio Sandbox CONSUMES the "join <code>" message to opt the
-// number in and never forwards it to our webhook, so that first message can't
-// start onboarding. A second, ordinary message is what actually reaches the
-// backend and kicks off the flow — hence the two-step success screen below. In
-// production (a real WhatsApp Business number) there is no join step: the join
-// code is just a greeting and a single tap reaches the webhook directly, so the
-// two-step UI collapses to one action. ``VITE_WHATSAPP_START_MESSAGE`` is the
-// text of that second message (default "Hola").
+// The program's WhatsApp number patients message to start enrollment.
+// Overridable per environment via ``VITE_WHATSAPP_NUMBER``.
+const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '15559853891'
+// The first message that starts onboarding. The engine greets on any first
+// message, so this is just a friendly prefilled "Hola" (overridable via env).
 const WHATSAPP_START_MESSAGE = import.meta.env.VITE_WHATSAPP_START_MESSAGE || 'Hola'
-const WHATSAPP_START_URL = `https://wa.me/${WHATSAPP_SANDBOX_NUMBER}?text=${encodeURIComponent(
+const WHATSAPP_START_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
   WHATSAPP_START_MESSAGE
 )}`
-// Treat a "join …" prefilled phrase as sandbox mode (needs the second message);
-// anything else is a production greeting that starts onboarding on its own.
-const IS_SANDBOX = /^join\s/i.test(WHATSAPP_JOIN_CODE)
 
 /* The four-point Vela "sail" mark, shared with the landing. */
 function VelaMark({ className }) {
@@ -105,11 +90,8 @@ const COPY = {
       'Your account is registered. Use the QR code or buttons below to open WhatsApp and start your enrollment.',
     qrHint: 'Scan with your phone camera to open WhatsApp',
     qrOr: 'or',
-    joinStep1: 'Join the WhatsApp sandbox',
-    joinStep2: 'Send a message to start onboarding',
-    joinButton: 'Join the chat on WhatsApp',
     startButton: 'Send "Hola" to begin',
-    successNote: 'You can close this page once you have joined the chat.',
+    successNote: 'You can close this page once you have sent your first message.',
     successAltPrefix: 'Need to sign in later?',
     // validation
     passwordRequired: 'Password is required',
@@ -148,11 +130,8 @@ const COPY = {
       'Tu cuenta está registrada. Usa el código QR o los botones de abajo para abrir WhatsApp e iniciar tu inscripción.',
     qrHint: 'Escanea con la cámara de tu teléfono para abrir WhatsApp',
     qrOr: 'o',
-    joinStep1: 'Únete al sandbox de WhatsApp',
-    joinStep2: 'Envía un mensaje para iniciar la inscripción',
-    joinButton: 'Unirse al chat en WhatsApp',
     startButton: 'Enviar «Hola» para comenzar',
-    successNote: 'Puedes cerrar esta página una vez que te hayas unido al chat.',
+    successNote: 'Puedes cerrar esta página una vez que hayas enviado tu primer mensaje.',
     successAltPrefix: '¿Necesitas iniciar sesión más tarde?',
     // validation
     passwordRequired: 'La contraseña es obligatoria',
@@ -279,43 +258,15 @@ export default function RegisterPage() {
                 <h1>{t.successTitle}</h1>
                 <p>{t.successBody}</p>
               </div>
-              {IS_SANDBOX ? (
-                // Sandbox: two steps, because the "join <code>" message is eaten
-                // by Twilio and a second message is what actually starts onboarding.
-                <>
-                  <div className="auth-join-step-head">
-                    <span className="auth-join-step-num">1</span>
-                    <p>{t.joinStep1}</p>
-                  </div>
-                  <JoinAction
-                    url={WHATSAPP_JOIN_URL}
-                    qrTitle={t.joinButton}
-                    qrHint={t.qrHint}
-                    orLabel={t.qrOr}
-                    buttonLabel={t.joinButton}
-                  />
-                  <div className="auth-join-step-head">
-                    <span className="auth-join-step-num">2</span>
-                    <p>{t.joinStep2}</p>
-                  </div>
-                  <JoinAction
-                    url={WHATSAPP_START_URL}
-                    qrTitle={t.startButton}
-                    qrHint={t.qrHint}
-                    orLabel={t.qrOr}
-                    buttonLabel={t.startButton}
-                  />
-                </>
-              ) : (
-                // Production: one tap reaches the webhook and starts onboarding.
-                <JoinAction
-                  url={WHATSAPP_JOIN_URL}
-                  qrTitle={t.joinButton}
-                  qrHint={t.qrHint}
-                  orLabel={t.qrOr}
-                  buttonLabel={t.joinButton}
-                />
-              )}
+              {/* One tap (or QR scan) opens WhatsApp with a prefilled "Hola"
+                  that reaches the webhook and starts onboarding. */}
+              <JoinAction
+                url={WHATSAPP_START_URL}
+                qrTitle={t.startButton}
+                qrHint={t.qrHint}
+                orLabel={t.qrOr}
+                buttonLabel={t.startButton}
+              />
               <p className="auth-success-note">{t.successNote}</p>
               <p className="auth-alt">
                 {t.successAltPrefix} <Link to="/login">{t.altLink}</Link>
