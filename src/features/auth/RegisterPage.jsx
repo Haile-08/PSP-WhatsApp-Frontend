@@ -25,6 +25,13 @@ const WHATSAPP_START_MESSAGE = import.meta.env.VITE_WHATSAPP_START_MESSAGE || 'H
 const WHATSAPP_START_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
   WHATSAPP_START_MESSAGE
 )}`
+// The "join the chat" button just opens the WhatsApp conversation. Set
+// VITE_WHATSAPP_JOIN_MESSAGE (e.g. a sandbox "join <code>" phrase) to prefill a
+// first message; left empty it opens the chat with no prefilled text.
+const WHATSAPP_JOIN_MESSAGE = import.meta.env.VITE_WHATSAPP_JOIN_MESSAGE || ''
+const WHATSAPP_JOIN_URL = WHATSAPP_JOIN_MESSAGE
+  ? `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_JOIN_MESSAGE)}`
+  : `https://wa.me/${WHATSAPP_NUMBER}`
 
 /* The four-point Vela "sail" mark, shared with the landing. */
 function VelaMark({ className }) {
@@ -42,21 +49,13 @@ function WhatsAppIcon() {
   )
 }
 
-/* One "open WhatsApp" action: a scannable QR (for desktop registrants) plus the
-   tap-through button (for mobile), both pointing at the same prefilled wa.me URL. */
-function JoinAction({ url, qrTitle, qrHint, orLabel, buttonLabel }) {
+/* A WhatsApp call-to-action button pointing at a prefilled wa.me URL. */
+function WhatsAppButton({ url, label }) {
   return (
-    <>
-      <div className="auth-qr">
-        <QRCodeSVG value={url} size={150} level="M" marginSize={2} title={qrTitle} />
-      </div>
-      <p className="auth-qr-hint">{qrHint}</p>
-      <div className="auth-qr-or">{orLabel}</div>
-      <a className="auth-whatsapp-btn" href={url} target="_blank" rel="noopener noreferrer">
-        <WhatsAppIcon />
-        <span>{buttonLabel}</span>
-      </a>
-    </>
+    <a className="auth-whatsapp-btn" href={url} target="_blank" rel="noopener noreferrer">
+      <WhatsAppIcon />
+      <span>{label}</span>
+    </a>
   )
 }
 
@@ -90,6 +89,7 @@ const COPY = {
       'Your account is registered. Use the QR code or buttons below to open WhatsApp and start your enrollment.',
     qrHint: 'Scan with your phone camera to open WhatsApp',
     qrOr: 'or',
+    joinButton: 'Join the chat on WhatsApp',
     startButton: 'Send "Hola" to begin',
     successNote: 'You can close this page once you have sent your first message.',
     successAltPrefix: 'Need to sign in later?',
@@ -130,6 +130,7 @@ const COPY = {
       'Tu cuenta está registrada. Usa el código QR o los botones de abajo para abrir WhatsApp e iniciar tu inscripción.',
     qrHint: 'Escanea con la cámara de tu teléfono para abrir WhatsApp',
     qrOr: 'o',
+    joinButton: 'Unirse al chat en WhatsApp',
     startButton: 'Enviar «Hola» para comenzar',
     successNote: 'Puedes cerrar esta página una vez que hayas enviado tu primer mensaje.',
     successAltPrefix: '¿Necesitas iniciar sesión más tarde?',
@@ -258,15 +259,23 @@ export default function RegisterPage() {
                 <h1>{t.successTitle}</h1>
                 <p>{t.successBody}</p>
               </div>
-              {/* One tap (or QR scan) opens WhatsApp with a prefilled "Hola"
-                  that reaches the webhook and starts onboarding. */}
-              <JoinAction
-                url={WHATSAPP_START_URL}
-                qrTitle={t.startButton}
-                qrHint={t.qrHint}
-                orLabel={t.qrOr}
-                buttonLabel={t.startButton}
-              />
+              {/* Scan the QR (desktop registrants) or tap a button (mobile) —
+                  both open WhatsApp and reach the webhook to start onboarding. */}
+              <div className="auth-qr">
+                <QRCodeSVG
+                  value={WHATSAPP_START_URL}
+                  size={150}
+                  level="M"
+                  marginSize={2}
+                  title={t.startButton}
+                />
+              </div>
+              <p className="auth-qr-hint">{t.qrHint}</p>
+              <div className="auth-qr-or">{t.qrOr}</div>
+              <div className="auth-whatsapp-actions">
+                <WhatsAppButton url={WHATSAPP_JOIN_URL} label={t.joinButton} />
+                <WhatsAppButton url={WHATSAPP_START_URL} label={t.startButton} />
+              </div>
               <p className="auth-success-note">{t.successNote}</p>
               <p className="auth-alt">
                 {t.successAltPrefix} <Link to="/login">{t.altLink}</Link>

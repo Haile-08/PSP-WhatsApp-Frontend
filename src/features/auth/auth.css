@@ -348,6 +348,10 @@
 }
 
 /* WhatsApp "join the chat" CTA on the post-registration success screen. */
+.auth-whatsapp-actions {
+  display: flex;
+  flex-direction: column;
+}
 .auth-whatsapp-btn {
   display: flex;
   align-items: center;
