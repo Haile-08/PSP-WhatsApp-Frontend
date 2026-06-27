@@ -18,7 +18,7 @@ const MAX_USERNAME_LENGTH = 50
 
 // The program's WhatsApp number patients message to start enrollment.
 // Overridable per environment via ``VITE_WHATSAPP_NUMBER``.
-const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '15559853891'
+const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '14155238886'
 // The first message that starts onboarding. The engine greets on any first
 // message, so this is just a friendly prefilled "Hola" (overridable via env).
 const WHATSAPP_START_MESSAGE = import.meta.env.VITE_WHATSAPP_START_MESSAGE || 'Hola'
@@ -28,7 +28,7 @@ const WHATSAPP_START_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURICom
 // The "join the chat" button just opens the WhatsApp conversation. Set
 // VITE_WHATSAPP_JOIN_MESSAGE (e.g. a sandbox "join <code>" phrase) to prefill a
 // first message; left empty it opens the chat with no prefilled text.
-const WHATSAPP_JOIN_MESSAGE = import.meta.env.VITE_WHATSAPP_JOIN_MESSAGE || ''
+const WHATSAPP_JOIN_MESSAGE = import.meta.env.VITE_WHATSAPP_JOIN_MESSAGE || 'join rhyme-year'
 const WHATSAPP_JOIN_URL = WHATSAPP_JOIN_MESSAGE
   ? `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_JOIN_MESSAGE)}`
   : `https://wa.me/${WHATSAPP_NUMBER}`
