@@ -263,11 +263,11 @@ export default function RegisterPage() {
                   both open WhatsApp and reach the webhook to start onboarding. */}
               <div className="auth-qr">
                 <QRCodeSVG
-                  value={WHATSAPP_START_URL}
+                  value={WHATSAPP_JOIN_URL}
                   size={150}
                   level="M"
                   marginSize={2}
-                  title={t.startButton}
+                  title={t.joinButton}
                 />
               </div>
               <p className="auth-qr-hint">{t.qrHint}</p>
