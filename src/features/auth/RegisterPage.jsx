@@ -17,21 +17,14 @@ const MIN_USERNAME_LENGTH = 3
 const MAX_USERNAME_LENGTH = 50
 
 // The program's WhatsApp number patients message to start enrollment.
-// Overridable per environment via ``VITE_WHATSAPP_NUMBER``.
-const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '14155238886'
+// Overridable per environment via ``VITE_WHATSAPP_NUMBER`` (digits only, no '+').
+const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '5215571000762'
 // The first message that starts onboarding. The engine greets on any first
 // message, so this is just a friendly prefilled "Hola" (overridable via env).
 const WHATSAPP_START_MESSAGE = import.meta.env.VITE_WHATSAPP_START_MESSAGE || 'Hola'
 const WHATSAPP_START_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
   WHATSAPP_START_MESSAGE
 )}`
-// The "join the chat" button just opens the WhatsApp conversation. Set
-// VITE_WHATSAPP_JOIN_MESSAGE (e.g. a sandbox "join <code>" phrase) to prefill a
-// first message; left empty it opens the chat with no prefilled text.
-const WHATSAPP_JOIN_MESSAGE = import.meta.env.VITE_WHATSAPP_JOIN_MESSAGE || 'join rhyme-year'
-const WHATSAPP_JOIN_URL = WHATSAPP_JOIN_MESSAGE
-  ? `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_JOIN_MESSAGE)}`
-  : `https://wa.me/${WHATSAPP_NUMBER}`
 
 /* The four-point Vela "sail" mark, shared with the landing. */
 function VelaMark({ className }) {
@@ -89,7 +82,6 @@ const COPY = {
       'Your account is registered. Use the QR code or buttons below to open WhatsApp and start your enrollment.',
     qrHint: 'Scan with your phone camera to open WhatsApp',
     qrOr: 'or',
-    joinButton: 'Join the chat on WhatsApp',
     startButton: 'Send "Hola" to begin',
     successNote: 'You can close this page once you have sent your first message.',
     successAltPrefix: 'Need to sign in later?',
@@ -130,7 +122,6 @@ const COPY = {
       'Tu cuenta está registrada. Usa el código QR o los botones de abajo para abrir WhatsApp e iniciar tu inscripción.',
     qrHint: 'Escanea con la cámara de tu teléfono para abrir WhatsApp',
     qrOr: 'o',
-    joinButton: 'Unirse al chat en WhatsApp',
     startButton: 'Enviar «Hola» para comenzar',
     successNote: 'Puedes cerrar esta página una vez que hayas enviado tu primer mensaje.',
     successAltPrefix: '¿Necesitas iniciar sesión más tarde?',
@@ -259,21 +250,21 @@ export default function RegisterPage() {
                 <h1>{t.successTitle}</h1>
                 <p>{t.successBody}</p>
               </div>
-              {/* Scan the QR (desktop registrants) or tap a button (mobile) —
-                  both open WhatsApp and reach the webhook to start onboarding. */}
+              {/* Scan the QR (desktop registrants) or tap the button (mobile) —
+                  both open WhatsApp with a prefilled "Hola" and reach the webhook
+                  to start onboarding. */}
               <div className="auth-qr">
                 <QRCodeSVG
-                  value={WHATSAPP_JOIN_URL}
+                  value={WHATSAPP_START_URL}
                   size={150}
                   level="M"
                   marginSize={2}
-                  title={t.joinButton}
+                  title={t.startButton}
                 />
               </div>
               <p className="auth-qr-hint">{t.qrHint}</p>
               <div className="auth-qr-or">{t.qrOr}</div>
               <div className="auth-whatsapp-actions">
-                <WhatsAppButton url={WHATSAPP_JOIN_URL} label={t.joinButton} />
                 <WhatsAppButton url={WHATSAPP_START_URL} label={t.startButton} />
               </div>
               <p className="auth-success-note">{t.successNote}</p>
