@@ -613,8 +613,10 @@ function ConversationPane({ user }) {
     const ts = msg.created_at || msg.timestamp
     const role = msg.role || (msg.is_user ? 'user' : 'assistant')
     const isOutgoing = role === 'user'
-    if (!isSameDay(ts, prevDate)) {
-      rendered.push(<DateSeparator key={`sep-${idx}`} isoString={ts || new Date().toISOString()} />)
+    // History recorded before timestamp stamping was added has no ``ts`` —
+    // skip the separator for those instead of labelling every bubble "today".
+    if (ts && !isSameDay(ts, prevDate)) {
+      rendered.push(<DateSeparator key={`sep-${idx}`} isoString={ts} />)
       prevDate = ts
       prevRole = null
     }
