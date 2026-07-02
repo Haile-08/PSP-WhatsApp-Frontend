@@ -3,10 +3,15 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { CheckCheck, Check, Clock, Paperclip } from 'lucide-react'
 
-function BubbleTimestamp({ isoString, status, isOutgoing }) {
-  const time = isoString
-    ? new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
-    : ''
+function BubbleTimestamp({ isoString, status, isOutgoing, showDate = false }) {
+  let stamp = ''
+  if (isoString) {
+    const d = new Date(isoString)
+    const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
+    stamp = showDate
+      ? `${d.toLocaleDateString([], { day: '2-digit', month: '2-digit', year: '2-digit' })} ${time}`
+      : time
+  }
 
   return (
     <span
@@ -29,7 +34,7 @@ function BubbleTimestamp({ isoString, status, isOutgoing }) {
           whiteSpace: 'nowrap',
         }}
       >
-        {time}
+        {stamp}
       </span>
       {isOutgoing && (
         <>
@@ -289,6 +294,7 @@ export default function MessageBubble({
   directiveActive = false,
   onDirectiveSend,
   onUpload,
+  showDateStamp = false,
 }) {
   const isStreaming = message.status === 'streaming'
   const content = message.content || message.text || ''
@@ -338,6 +344,7 @@ export default function MessageBubble({
               isoString={message.created_at || message.timestamp}
               status={message.status}
               isOutgoing={isOutgoing}
+              showDate={showDateStamp}
             />
           </span>
         ) : (
@@ -360,6 +367,7 @@ export default function MessageBubble({
               isoString={message.created_at || message.timestamp}
               status={message.status}
               isOutgoing={isOutgoing}
+              showDate={showDateStamp}
             />
           </div>
         )}

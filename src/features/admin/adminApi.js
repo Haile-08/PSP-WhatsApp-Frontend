@@ -4,8 +4,11 @@ import baseQuery from '../../lib/baseQuery'
 // Polling cadence for the contact list and the per-user feeds. The admin
 // console is meant to feel live: when the agent calls log_escalation,
 // the badge should light up without the operator refreshing.
-const USERS_POLL_MS = 5000
-const DETAIL_POLL_MS = 4000
+// NOTE: RTK Query only honours `pollingInterval` as a *hook* option, not an
+// endpoint option, so these are exported for the components to pass at the
+// call sites (useAdminUsersQuery(undefined, { pollingInterval: ... })).
+export const USERS_POLL_MS = 5000
+export const DETAIL_POLL_MS = 4000
 
 export const adminApi = createApi({
   reducerPath: 'adminApi',
@@ -15,32 +18,22 @@ export const adminApi = createApi({
     adminUsers: builder.query({
       query: () => '/admin/users',
       providesTags: ['AdminUsers'],
-      pollingInterval: USERS_POLL_MS,
     }),
     adminStats: builder.query({
       query: () => '/admin/stats',
       providesTags: ['AdminStats'],
-      // The dashboard is a live operations view: poll on the same cadence as
-      // the contact list so KPIs and charts track the database without a refresh.
-      pollingInterval: USERS_POLL_MS,
     }),
     adminUserProfile: builder.query({
       query: (userId) => `/admin/users/${userId}/profile`,
       providesTags: (_r, _e, userId) => [{ type: 'AdminProfile', id: userId }],
-      // The patient keeps filling in onboarding fields over WhatsApp while the
-      // operator watches, so refresh the profile on the same live cadence as
-      // the conversation feed.
-      pollingInterval: DETAIL_POLL_MS,
     }),
     adminUserConversation: builder.query({
       query: (userId) => `/admin/users/${userId}/conversation`,
       providesTags: (_r, _e, userId) => [{ type: 'AdminConversation', id: userId }],
-      pollingInterval: DETAIL_POLL_MS,
     }),
     adminUserEscalations: builder.query({
       query: (userId) => `/admin/users/${userId}/escalations`,
       providesTags: (_r, _e, userId) => [{ type: 'AdminEscalations', id: userId }],
-      pollingInterval: DETAIL_POLL_MS,
     }),
     sendAdminMessage: builder.mutation({
       query: ({ userId, content }) => ({

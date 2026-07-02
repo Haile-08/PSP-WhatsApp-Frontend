@@ -35,6 +35,7 @@ import {
   BadgeCheck,
   PanelLeftClose,
   PanelLeftOpen,
+  RefreshCw,
 } from 'lucide-react'
 import Avatar from '../../components/Avatar'
 import DropdownMenu from '../../components/DropdownMenu'
@@ -45,6 +46,9 @@ import DateSeparator from '../chat/DateSeparator'
 import ChatInput from '../chat/ChatInput'
 import { logout } from '../auth/authSlice'
 import {
+  adminApi,
+  USERS_POLL_MS,
+  DETAIL_POLL_MS,
   useAdminUsersQuery,
   useAdminUserProfileQuery,
   useAdminUserConversationQuery,
@@ -55,6 +59,11 @@ import {
   useApproveClaimMutation,
   useRejectClaimMutation,
 } from './adminApi'
+
+// Shared hook options for the live queries: pause polling in background tabs
+// and refetch the moment the operator refocuses (see setupListeners in
+// app/store.js).
+const LIVE_QUERY_OPTS = { skipPollingIfUnfocused: true, refetchOnFocus: true }
 
 // Reason codes mirror app/models/escalation.py — we render friendly
 // labels here so the operator does not see the raw enum.
@@ -168,6 +177,25 @@ function formatRelativeTime(iso) {
 function AdminHeader() {
   const dispatch = useDispatch()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
+
+  // Invalidate every admin tag: RTK Query refetches whichever queries are on
+  // screen (patient list, conversation, profile) right away instead of waiting
+  // for the next poll tick. The brief spin is visual feedback that the refetch
+  // was kicked off.
+  const handleRefresh = () => {
+    dispatch(
+      adminApi.util.invalidateTags([
+        'AdminUsers',
+        'AdminConversation',
+        'AdminProfile',
+        'AdminEscalations',
+        'AdminStats',
+      ]),
+    )
+    setRefreshing(true)
+    setTimeout(() => setRefreshing(false), 900)
+  }
   return (
     <div
       className="flex items-center justify-between shrink-0"
@@ -204,7 +232,18 @@ function AdminHeader() {
           </div>
         </div>
       </div>
-      <div style={{ position: 'relative' }}>
+      <div className="flex items-center" style={{ position: 'relative', gap: '4px' }}>
+        <button
+          className="icon-btn"
+          title="Refresh data"
+          aria-label="Refresh data"
+          onClick={handleRefresh}
+        >
+          <RefreshCw
+            size={20}
+            style={refreshing ? { animation: 'spin 0.9s linear' } : undefined}
+          />
+        </button>
         <button
           className="icon-btn"
           title="More options"
@@ -537,7 +576,10 @@ function ConversationHeader({ user }) {
 }
 
 function ConversationPane({ user }) {
-  const { data, isFetching } = useAdminUserConversationQuery(user.id)
+  const { data, isFetching } = useAdminUserConversationQuery(user.id, {
+    pollingInterval: DETAIL_POLL_MS,
+    ...LIVE_QUERY_OPTS,
+  })
   const [sendAdminMessage, { isLoading: isSending }] = useSendAdminMessageMutation()
   const messages = data?.messages || []
 
@@ -553,7 +595,10 @@ function ConversationPane({ user }) {
     }
   }
 
-  if (isFetching && messages.length === 0) {
+  // Only show the loading screen before the first response arrives — polls
+  // set isFetching too, and an empty-but-loaded conversation should keep
+  // showing its "No messages" state instead of flashing this every tick.
+  if (isFetching && !data) {
     return (
       <div className="flex-1 flex items-center justify-center chat-bg">
         <span style={{ color: '#8a958f', fontSize: '14px' }}>Loading conversation…</span>
@@ -580,6 +625,7 @@ function ConversationPane({ user }) {
         message={msg}
         showTail={showTail}
         isOutgoing={isOutgoing}
+        showDateStamp
       />,
     )
     prevRole = role
@@ -933,7 +979,10 @@ function ProfileViewToggle({ view, onChange }) {
 }
 
 function ProfilePane({ user }) {
-  const { data: profile, isFetching } = useAdminUserProfileQuery(user.id)
+  const { data: profile, isFetching } = useAdminUserProfileQuery(user.id, {
+    pollingInterval: DETAIL_POLL_MS,
+    ...LIVE_QUERY_OPTS,
+  })
   const currentPhase = user.onboarding_phase
   const [view, setView] = useState('personal')
 
@@ -1916,7 +1965,10 @@ function EmptyState() {
 // The Patients workspace: the live contact list (collapsible), the read-only
 // conversation feed, and the per-phase onboarding profile pane.
 function PatientsView() {
-  const { data: users = [] } = useAdminUsersQuery()
+  const { data: users = [] } = useAdminUsersQuery(undefined, {
+    pollingInterval: USERS_POLL_MS,
+    ...LIVE_QUERY_OPTS,
+  })
   // ``null`` means "no manual selection yet" — the render then falls back
   // to the user with the most recent open escalation so the operator's
   // eye lands somewhere useful without us calling setState in an effect.

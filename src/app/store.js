@@ -1,4 +1,5 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit'
+import { setupListeners } from '@reduxjs/toolkit/query'
 import { adminApi } from '../features/admin/adminApi'
 import { authApi } from '../features/auth/authApi'
 import authReducer from '../features/auth/authSlice'
@@ -29,3 +30,8 @@ export const store = configureStore({
       .concat(authApi.middleware)
       .concat(adminApi.middleware),
 })
+
+// Wire up focus/online events so queries using `refetchOnFocus` (and polling
+// with `skipPollingIfUnfocused`) refresh as soon as the operator returns to
+// the tab.
+setupListeners(store.dispatch)

@@ -7,7 +7,7 @@ import {
   Truck,
   TrendingUp,
 } from 'lucide-react'
-import { useAdminStatsQuery } from './adminApi'
+import { USERS_POLL_MS, useAdminStatsQuery } from './adminApi'
 
 const FONT = '"Segoe UI", Helvetica, Arial, sans-serif'
 const ACCENT = '#5FBA82'
@@ -331,7 +331,11 @@ function HBarList({ data, labelOf }) {
 }
 
 export default function DashboardView() {
-  const { data, isLoading, isError } = useAdminStatsQuery()
+  const { data, isLoading, isError } = useAdminStatsQuery(undefined, {
+    pollingInterval: USERS_POLL_MS,
+    skipPollingIfUnfocused: true,
+    refetchOnFocus: true,
+  })
 
   if (isLoading) {
     return (
